@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ inputs, lib, ... }:
 {
   perSystem =
     {
@@ -13,10 +13,10 @@
           (lib.filterAttrs (version: _: lib.length (lib.splitString "_" version) == 3))
           (lib.mapAttrs' (
             version: kubernetes:
-            lib.nameValuePair version (
+            lib.nameValuePair "kubernetes-${version}" (
               lib.optionalAttrs (
                 lib.meta.availableOn { inherit system; } kubernetes && kubernetes.passthru.is_maintained
-              ) (pkgs.callPackage ./kubernetes.nix { inherit kubernetes; })
+              ) (pkgs.callPackage ./kubernetes.nix { inherit kubernetes inputs; })
             )
           ))
           (lib.filterAttrs (_: v: v != { }))

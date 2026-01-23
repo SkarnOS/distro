@@ -16,6 +16,7 @@
         ./dev-shell.nix
         ./packages
         ./checks
+        ./modules/nixos
       ];
       systems = [
         "x86_64-linux"
