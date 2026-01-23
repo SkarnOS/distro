@@ -13,8 +13,13 @@
           (lib.filterAttrs (version: _: lib.length (lib.splitString "_" version) == 3))
           (lib.mapAttrs' (
             version: kubernetes:
-            lib.nameValuePair version (pkgs.callPackage ./kubernetes.nix { inherit kubernetes; })
+            lib.nameValuePair version (
+              lib.optionalAttrs (lib.meta.availableOn { inherit system; } kubernetes) (
+                pkgs.callPackage ./kubernetes.nix { inherit kubernetes; }
+              )
+            )
           ))
+          (lib.filterAttrs (_: v: v != { }))
         ])
       ];
     };
