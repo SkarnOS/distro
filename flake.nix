@@ -15,6 +15,7 @@
         ./treefmt.nix
         ./dev-shell.nix
         ./packages
+        ./checks
       ];
       systems = [
         "x86_64-linux"
