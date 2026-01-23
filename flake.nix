@@ -14,6 +14,7 @@
         inputs.treefmt-nix.flakeModule
         ./treefmt.nix
         ./dev-shell.nix
+        ./packages
       ];
       systems = [
         "x86_64-linux"
