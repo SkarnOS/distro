@@ -55,20 +55,21 @@ class TopLevel(BaseModel):
 class Source(BaseModel):
     version: str
     hash: str
+    is_maintained: bool
 
 class NixStorePrefetchFileOutput(BaseModel):
     hash: str
     storePath: str
 
-async def prefetch_kubernetes_version(tmpdir: str, major: str, minor: str):
-    print(f"fetching {minor}")
+async def prefetch_kubernetes_version(tmpdir: str, release: Release):
+    print(f"fetching {release.latest.name}")
 
     process = await asyncio.create_subprocess_exec(
         "nix", "store", "prefetch-file",
         "--hash-type", "sha256",
         "--json",
         "--unpack",
-        f"https://github.com/kubernetes/kubernetes/archive/refs/tags/v{minor}.tar.gz",
+        f"https://github.com/kubernetes/kubernetes/archive/refs/tags/v{release.latest.name}.tar.gz",
         stdout = asyncio.subprocess.PIPE,
         stderr = asyncio.subprocess.DEVNULL,
         env = os.environ | { "TMPDIR": tmpdir }
@@ -78,13 +79,14 @@ async def prefetch_kubernetes_version(tmpdir: str, major: str, minor: str):
     if process.returncode == 0:
         output = NixStorePrefetchFileOutput.model_validate_json(stdout)
 
-        print(f"fetched {minor} with hash {output.hash}")
+        print(f"fetched {release.latest.name} with hash {output.hash}")
 
         return {
-            major: minor,
-            minor: Source(
-                version = minor,
-                hash = output.hash
+            release.name: release.latest.name,
+            release.latest.name: Source(
+                version = release.latest.name,
+                hash = output.hash,
+                is_maintained = release.isMaintained
             )
         }
 
@@ -99,7 +101,7 @@ async def main():
         if not os.path.exists(tmpdir):
             os.mkdir(tmpdir)
 
-        sources_list: list[dict[str, Source | str]] = await asyncio.gather(*map(lambda release: prefetch_kubernetes_version(tmpdir, release.name, release.latest.name), toplevel.result.releases))
+        sources_list: list[dict[str, Source | str]] = await asyncio.gather(*map(lambda release: prefetch_kubernetes_version(tmpdir, release), toplevel.result.releases))
         sources: dict[str, Source | str] = reduce(operator.or_, sources_list, {})
 
         source_dict_adapter = TypeAdapter(dict[str, Source | str])
@@ -108,12 +110,6 @@ async def main():
             json = source_dict_adapter.dump_json(sources, indent = 4)
             sources_file.write(json)
 
-        # nix-prefetch-url --unpack --print-path https://github.com/NixOS/patchelf/archive/0.8.tar.gz
-
-        # Parse the response and print it
-
-
-        # https://endoflife.date/api/v1/products/kubernetes/
     finally:
         shutil.rmtree(tmpdir)
 

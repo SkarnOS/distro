@@ -16,6 +16,7 @@
 
   version,
   hash,
+  is_maintained,
 }:
 let
   binariesFilter = ''
@@ -145,6 +146,8 @@ lib.fix (
     '';
 
     passthru = {
+      inherit is_maintained;
+
       updateScript = nix-update-script { };
       # tests = nixosTests.kubernetes // {
       #   inherit kubectl;

@@ -14,9 +14,9 @@
           (lib.mapAttrs' (
             version: kubernetes:
             lib.nameValuePair version (
-              lib.optionalAttrs (lib.meta.availableOn { inherit system; } kubernetes) (
-                pkgs.callPackage ./kubernetes.nix { inherit kubernetes; }
-              )
+              lib.optionalAttrs (
+                lib.meta.availableOn { inherit system; } kubernetes && kubernetes.passthru.is_maintained
+              ) (pkgs.callPackage ./kubernetes.nix { inherit kubernetes; })
             )
           ))
           (lib.filterAttrs (_: v: v != { }))

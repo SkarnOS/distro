@@ -10,9 +10,13 @@
         )
         (lib.mapAttrs' (
           name:
-          { version, hash }:
+          {
+            version,
+            hash,
+            is_maintained,
+          }:
           lib.nameValuePair (lib.replaceString "." "_" name) (
-            pkgs.callPackage ./kubernetes.nix { inherit version hash; }
+            pkgs.callPackage ./kubernetes.nix { inherit version hash is_maintained; }
           )
         ))
       ];
