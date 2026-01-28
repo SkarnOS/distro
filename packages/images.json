@@ -1,0 +1,58 @@
+{
+  "ciliumPod": {
+    "finalImageName": "quay.io/cilium/cilium",
+    "finalImageTag": null,
+    "hash": "",
+    "imageDigest": "sha256:858f807ea4e20e85e3ea3240a762e1f4b29f1cb5bbd0463b8aa77e7b097c0667",
+    "imageName": "quay.io/cilium/cilium",
+    "imageTag": "v1.18.2"
+  },
+  "corednsPod": {
+    "finalImageName": "registry.k8s.io/coredns/coredns",
+    "finalImageTag": null,
+    "hash": "",
+    "imageDigest": "sha256:e8c262566636e6bc340ece6473b0eed193cad045384401529721ddbe6463d31c",
+    "imageName": "registry.k8s.io/coredns/coredns",
+    "imageTag": "v1.12.1"
+  },
+  "etcdPod": {
+    "finalImageName": "registry.k8s.io/etcd",
+    "finalImageTag": null,
+    "hash": "",
+    "imageDigest": "sha256:60a30b5d81b2217555e2cfb9537f655b7ba97220b99c39ee2e162a7127225890",
+    "imageName": "registry.k8s.io/etcd",
+    "imageTag": "3.6.6-0"
+  },
+  "kubeapiPod": {
+    "finalImageName": "registry.k8s.io/kube-apiserver",
+    "finalImageTag": null,
+    "hash": "",
+    "imageDigest": "sha256:5af1030676ceca025742ef5e73a504d11b59be0e5551cdb8c9cf0d3c1231b460",
+    "imageName": "registry.k8s.io/kube-apiserver",
+    "imageTag": "v1.34.3"
+  },
+  "kubecontrollerPod": {
+    "finalImageName": "registry.k8s.io/kube-controller-manager",
+    "finalImageTag": null,
+    "hash": "",
+    "imageDigest": "sha256:716a210d31ee5e27053ea0e1a3a3deb4910791a85ba4b1120410b5a4cbcf1954",
+    "imageName": "registry.k8s.io/kube-controller-manager",
+    "imageTag": "v1.34.3"
+  },
+  "kubeschedulerPod": {
+    "finalImageName": "registry.k8s.io/kube-scheduler",
+    "finalImageTag": null,
+    "hash": "",
+    "imageDigest": "sha256:f9a9bc7948fd804ef02255fe82ac2e85d2a66534bae2fe1348c14849260a1fe2",
+    "imageName": "registry.k8s.io/kube-scheduler",
+    "imageTag": "v1.34.3"
+  },
+  "pausePod": {
+    "finalImageName": "registry.k8s.io/pause",
+    "finalImageTag": null,
+    "hash": "",
+    "imageDigest": "sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+    "imageName": "registry.k8s.io/pause",
+    "imageTag": "3.10.1"
+  }
+}

@@ -20,5 +20,18 @@
           )
         ))
       ];
+
+      legacyPackages.ociImages = lib.mapAttrs (
+        _: image:
+        pkgs.dockerTools.pullImage {
+          inherit (image)
+            finalImageName
+            finalImageTag
+            hash
+            imageDigest
+            imageName
+            ;
+        }
+      ) (lib.importJSON ./images.json);
     };
 }
