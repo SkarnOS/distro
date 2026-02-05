@@ -68,11 +68,8 @@ testers.nixosTest {
     machine.wait_for_unit("multi-user.target")
     ${lib.concatMapStringsSep "\n" (
       { name, value }:
-      let
-        namespace = lib.traceVal (if lib.hasPrefix "quay.io" name then "k8s.io" else "k8s.io");
-      in
       ''
-        machine.succeed("${lib.getExe' containerd "ctr"} -n ${namespace} image import ${value}")
+        machine.succeed("${lib.getExe' containerd "ctr"} -n k8s.io image import ${value}")
       ''
     ) (lib.mapAttrsToList lib.nameValuePair kubernetes.passthru.containers)}
 
