@@ -90,6 +90,8 @@ testers.nixosTest {
       "--version", "1.18.2",
       *cilium_params
     ]))
+    print(machine.succeed("cilium status --wait"))
+    print(machine.succeed("cilium connectivity test"))
     print(machine.succeed("kubectl get nodes"))
   '';
 }
