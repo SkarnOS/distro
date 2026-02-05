@@ -1,37 +1,99 @@
 { lib, ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     {
-      legacyPackages.kubernetes = lib.pipe (lib.importJSON ./sources.json) [
-        (
-          versions:
-          lib.mapAttrs (_: target: if lib.isString target then versions.${target} else target) versions
-        )
-        (lib.mapAttrs' (
-          name:
-          {
-            version,
-            hash,
-            is_maintained,
-          }:
-          lib.nameValuePair (lib.replaceString "." "_" name) (
-            pkgs.callPackage ./kubernetes.nix { inherit version hash is_maintained; }
-          )
-        ))
-      ];
+      options.rename-me.kubernetes = {
+        versions = lib.mkOption {
+          type = lib.types.lazyAttrsOf (
+            lib.types.submodule {
+              options = {
+                version = lib.mkOption {
+                  type = lib.types.str;
+                };
 
-      legacyPackages.ociImages = lib.mapAttrs (
-        _: image:
-        pkgs.dockerTools.pullImage {
-          inherit (image)
-            finalImageName
-            finalImageTag
-            hash
-            imageDigest
-            imageName
-            ;
-        }
-      ) (lib.importJSON ./images.json);
+                hash = lib.mkOption {
+                  type = lib.types.str;
+                };
+
+                is_maintained = lib.mkOption {
+                  type = lib.types.bool;
+                };
+
+                containers = lib.mkOption {
+                  type = lib.types.attrsOf lib.types.str;
+                };
+              };
+            }
+          );
+        };
+
+        images = lib.mkOption {
+          type = lib.types.attrsOf (
+            (lib.types.attrsOf (
+              lib.types.submodule {
+                options = {
+                  hash = lib.mkOption {
+                    type = lib.types.str;
+                  };
+
+                  digest = lib.mkOption {
+                    type = lib.types.str;
+                  };
+                };
+              }
+            ))
+          );
+          default = { };
+        };
+      };
+
+      config = {
+        rename-me.kubernetes.images = lib.importJSON ./images.json;
+        rename-me.kubernetes.versions = lib.mapAttrs (
+          _: version:
+          if lib.isString version then config.rename-me.kubernetes.versions.${version} else version
+        ) (lib.importJSON ./sources.json);
+
+        legacyPackages.kubernetes = lib.pipe config.rename-me.kubernetes.versions [
+          (lib.mapAttrs' (
+            name:
+            {
+              version,
+              hash,
+              is_maintained,
+              containers,
+            }:
+            lib.nameValuePair (lib.replaceString "." "_" name) (
+              pkgs.callPackage ./kubernetes.nix {
+                inherit version hash is_maintained;
+                containers = lib.mapAttrs (name: tag: config.legacyPackages.ociImages.${name}.${tag}) containers;
+              }
+            )
+          ))
+        ];
+
+        legacyPackages.ociImages = lib.mapAttrs (
+          name: versions:
+          lib.mapAttrs (
+            version: image:
+            pkgs.dockerTools.pullImage {
+              finalImageName = name;
+              finalImageTag = version;
+              imageName = name;
+              imageDigest = image.digest;
+
+              inherit (image)
+                hash
+                ;
+            }
+            // {
+              passthru = image // {
+                inherit name version;
+              };
+            }
+          ) versions
+        ) config.rename-me.kubernetes.images;
+      };
     };
 }

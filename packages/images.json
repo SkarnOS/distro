@@ -1,58 +1,66 @@
 {
-  "ciliumPod": {
-    "finalImageName": "quay.io/cilium/cilium",
-    "finalImageTag": null,
-    "hash": "",
-    "imageDigest": "sha256:858f807ea4e20e85e3ea3240a762e1f4b29f1cb5bbd0463b8aa77e7b097c0667",
-    "imageName": "quay.io/cilium/cilium",
-    "imageTag": "v1.18.2"
+  "quay.io/cilium/cilium": {
+    "v1.18.2": {
+      "hash": "sha256-ceTrgHYFk0nAhGRdZEkmEPgbTx8gO4DG6X+OySNbDC4=",
+      "digest": "sha256:858f807ea4e20e85e3ea3240a762e1f4b29f1cb5bbd0463b8aa77e7b097c0667"
+    }
   },
-  "corednsPod": {
-    "finalImageName": "registry.k8s.io/coredns/coredns",
-    "finalImageTag": null,
-    "hash": "",
-    "imageDigest": "sha256:e8c262566636e6bc340ece6473b0eed193cad045384401529721ddbe6463d31c",
-    "imageName": "registry.k8s.io/coredns/coredns",
-    "imageTag": "v1.12.1"
+  "quay.io/cilium/operator-generic": {
+    "v1.18.2": {
+      "hash": "sha256-ya87PbZaRmgLajp79jA+xbJGk04L5+4yWSqCYVhr/Aw=",
+      "digest": "sha256:cb4e4ffc5789fd5ff6a534e3b1460623df61cba00f5ea1c7b40153b5efb81805"
+    }
   },
-  "etcdPod": {
-    "finalImageName": "registry.k8s.io/etcd",
-    "finalImageTag": null,
-    "hash": "",
-    "imageDigest": "sha256:60a30b5d81b2217555e2cfb9537f655b7ba97220b99c39ee2e162a7127225890",
-    "imageName": "registry.k8s.io/etcd",
-    "imageTag": "3.6.6-0"
+  "registry.k8s.io/coredns/coredns": {
+    "v1.12.1": {
+      "hash": "sha256-8Op3vzupnC6kWIgjqk4ck2tzY2sra+L3xdzoQ4TTUtI=",
+      "digest": "sha256:e8c262566636e6bc340ece6473b0eed193cad045384401529721ddbe6463d31c"
+    },
+    "v1.13.1": {
+      "hash": "sha256-rgggCKSFk9v7GsTW+3c8GOPerbqgi/Xmtu5Dkkw+Y1k=",
+      "digest": "sha256:9b9128672209474da07c91439bf15ed704ae05ad918dd6454e5b6ae14e35fee6"
+    }
   },
-  "kubeapiPod": {
-    "finalImageName": "registry.k8s.io/kube-apiserver",
-    "finalImageTag": null,
-    "hash": "",
-    "imageDigest": "sha256:5af1030676ceca025742ef5e73a504d11b59be0e5551cdb8c9cf0d3c1231b460",
-    "imageName": "registry.k8s.io/kube-apiserver",
-    "imageTag": "v1.34.3"
+  "registry.k8s.io/etcd": {
+    "3.6.6-0": {
+      "hash": "sha256-JE1HJZczmuZ3xMmKGRGAqmCR2uX6ks/nd1nHIswPaxc=",
+      "digest": "sha256:60a30b5d81b2217555e2cfb9537f655b7ba97220b99c39ee2e162a7127225890"
+    }
   },
-  "kubecontrollerPod": {
-    "finalImageName": "registry.k8s.io/kube-controller-manager",
-    "finalImageTag": null,
-    "hash": "",
-    "imageDigest": "sha256:716a210d31ee5e27053ea0e1a3a3deb4910791a85ba4b1120410b5a4cbcf1954",
-    "imageName": "registry.k8s.io/kube-controller-manager",
-    "imageTag": "v1.34.3"
+  "registry.k8s.io/kube-apiserver": {
+    "v1.34.3": {
+      "hash": "sha256-xw2jlxwwrrCx6p4/tFJMRKOwPknFrSA3Cws1+Ij8gfc=",
+      "digest": "sha256:5af1030676ceca025742ef5e73a504d11b59be0e5551cdb8c9cf0d3c1231b460"
+    },
+    "v1.35.0": {
+      "hash": "sha256-W1+ZB9LjYzXNykWWxkI+2ri8gGlVWMRVorxHR++Pv70=",
+      "digest": "sha256:32f98b308862e1cf98c900927d84630fb86a836a480f02752a779eb85c1489f3"
+    }
   },
-  "kubeschedulerPod": {
-    "finalImageName": "registry.k8s.io/kube-scheduler",
-    "finalImageTag": null,
-    "hash": "",
-    "imageDigest": "sha256:f9a9bc7948fd804ef02255fe82ac2e85d2a66534bae2fe1348c14849260a1fe2",
-    "imageName": "registry.k8s.io/kube-scheduler",
-    "imageTag": "v1.34.3"
+  "registry.k8s.io/kube-controller-manager": {
+    "v1.34.3": {
+      "hash": "sha256-GMaP/nwNEpvUEydKuZ5DnK0hQLAUsd9BKwmcHktNdl8=",
+      "digest": "sha256:716a210d31ee5e27053ea0e1a3a3deb4910791a85ba4b1120410b5a4cbcf1954"
+    },
+    "v1.35.0": {
+      "hash": "sha256-a+xMv97bfxDsS/nnzNcujOVpYjxP8VPsgBz/p+whKJs=",
+      "digest": "sha256:3e343fd915d2e214b9a68c045b94017832927edb89aafa471324f8d05a191111"
+    }
   },
-  "pausePod": {
-    "finalImageName": "registry.k8s.io/pause",
-    "finalImageTag": null,
-    "hash": "",
-    "imageDigest": "sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
-    "imageName": "registry.k8s.io/pause",
-    "imageTag": "3.10.1"
+  "registry.k8s.io/kube-scheduler": {
+    "v1.34.3": {
+      "hash": "sha256-TNZoxx+rDvQIMdMVYjxLezOyTpoW7ZAfplwCwAR/PqI=",
+      "digest": "sha256:f9a9bc7948fd804ef02255fe82ac2e85d2a66534bae2fe1348c14849260a1fe2"
+    },
+    "v1.35.0": {
+      "hash": "sha256-kLfBiBERz6JJKySL+CB4uaRldQ8Ao+mc1hTDKdRGAm0=",
+      "digest": "sha256:0ab622491a82532e01876d55e365c08c5bac01bcd5444a8ed58c1127ab47819f"
+    }
+  },
+  "registry.k8s.io/pause": {
+    "3.10.1": {
+      "hash": "sha256-okwwg3Tclhh/BlzSA2BBIpT261HH2zXgEi0Z+PMTtnQ=",
+      "digest": "sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c"
+    }
   }
 }

@@ -17,6 +17,7 @@
   version,
   hash,
   is_maintained,
+  containers,
 }:
 let
   binariesFilter = ''
@@ -146,12 +147,7 @@ lib.fix (
     '';
 
     passthru = {
-      inherit is_maintained;
-
-      updateScript = nix-update-script { };
-      # tests = nixosTests.kubernetes // {
-      #   inherit kubectl;
-      # };
+      inherit is_maintained containers;
     };
 
     meta = {

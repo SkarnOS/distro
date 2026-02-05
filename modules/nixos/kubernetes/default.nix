@@ -8,7 +8,7 @@
 }:
 
 let
-  cfg = config.helsinki.kubernetes;
+  cfg = config.rename-me.kubernetes;
   internalInterfaceName =
     (if cfg.network.internal.interface == null then "dummy0" else cfg.network.internal.interface)
     + lib.optionalString (
@@ -19,7 +19,14 @@ let
     + lib.optionalString (cfg.network.ingress.vlanId != null) ".${toString cfg.network.ingress.vlanId}";
 in
 {
-  options.helsinki.kubernetes = {
+
+  imports = [
+    ./firewall.nix
+    ./flannel.nix
+    ./cilium.nix
+  ];
+
+  options.rename-me.kubernetes = {
     enable = lib.mkEnableOption "a kubeadm-managed Kubernetes node";
 
     upgradePackage = lib.mkOption {
@@ -57,11 +64,18 @@ in
     network = {
       cni = lib.mkOption {
         description = "Name of the CNI the host will be prepared for. Note that cilium has to be used in kube-proxy replacement mode. There is no IPv6 for Flannel";
-        type = lib.types.enum [
-          "flannel" #TODO: remove
-          "cilium"
-        ];
-        default = "cilium";
+        type = lib.types.attrTag {
+          # TODO: remove
+          "flannel" = lib.mkOption {
+            type = lib.types.submodule { };
+            default = { };
+          };
+          "cilium" = lib.mkOption {
+            type = lib.types.submodule { };
+            default = { };
+          };
+        };
+        default."cilium" = { };
       };
 
       dontConfigureNetworkd = lib.mkOption {
@@ -159,39 +173,6 @@ in
           "xt_comment"
           "xt_conntrack"
         ]
-        ++ (lib.optionals (cfg.network.cni == "cilium") [
-          "cls_bpf"
-          "ip6table_filter"
-          "ip6table_mangle"
-          "ip6table_raw"
-          "ip6tables"
-          "ip_set"
-          "ip_tables"
-          "nf_log_syslog"
-          "sch_fq"
-          "sch_ingress"
-          "veth"
-          "vxlan"
-          "xfrm_user"
-          "xt_CT"
-          "xt_TPROXY"
-          "xt_mark"
-          "xt_socket"
-        ])
-        ++ (lib.optionals (cfg.network.cni == "flannel") [
-          # Absolutely required by kube-proxy and flannel
-          "ipt_REJECT"
-          "nf_conntrack"
-          "nft_reject_inet"
-          "veth"
-          "xt_MASQUERADE"
-          "xt_addrtype"
-          "xt_mark"
-          "xt_nat"
-          "xt_recent"
-          "xt_statistic"
-          "xt_tcpudp"
-        ])
         ++ (lib.optionals cfg.openebs.enable [
           "nvme-tcp"
         ])
@@ -219,9 +200,6 @@ in
         conntrack-tools
         iptables-nftables-compat
       ]
-      ++ (lib.optionals (cfg.network.cni == "cilium") [
-        bpftools
-      ])
       ++ (lib.optionals (cfg.upgradePackage != null) [
         (pkgs.runCommand "kubeadm-upgrade" { inherit (cfg) upgradePackage; } ''
           mkdir -p $out/bin
@@ -238,9 +216,6 @@ in
           registerNode = true; # why not?
           clusterDns =
             if (lib.versionAtLeast (lib.versions.majorMinor lib.version) "24.11") then [ "" ] else ""; # don't overwrite my DNS
-          nodeIp = lib.mkIf (
-            cfg.network.cni == "cilium" && cfg.network.internal.interface == null
-          ) "192.168.8.1,fd08:4e1::1";
           extraOpts = lib.escapeShellArgs [
             # allow having swap
             "--fail-swap-on=false"
@@ -308,31 +283,31 @@ in
         # Setting a mode forces this to not be a symlink, because we cannot resolve symlinks to /nix in containers
         "ssl/certs/ca-certificates.crt".mode = "0444";
         /*
-        "kubernetes/stop-node".source = ./stop-node;
-        "kubernetes/elma-crb.yaml".source = ./elma-crb.yaml;
-        "kubernetes/oidc.yaml" = lib.mkIf (cfg.elmaAudience != null) {
-          # No symlink
-          mode = "0444";
-          text = # yaml
-            ''
-              ---
-              apiVersion: apiserver.config.k8s.io/v1beta1
-              kind: AuthenticationConfiguration
-              jwt:
-              - issuer:
-                  url: https://elma.id
-                  audiences:
-                  - ${cfg.elmaAudience}
-                  audienceMatchPolicy: MatchAny
-                claimMappings:
-                  username:
-                    claim: "sub"
-                    prefix: "elma:"
-                  groups:
-                    claim: "groups"
-                    prefix: "elma:"
-            '';
-        };
+          "kubernetes/stop-node".source = ./stop-node;
+          "kubernetes/elma-crb.yaml".source = ./elma-crb.yaml;
+          "kubernetes/oidc.yaml" = lib.mkIf (cfg.elmaAudience != null) {
+            # No symlink
+            mode = "0444";
+            text = # yaml
+              ''
+                ---
+                apiVersion: apiserver.config.k8s.io/v1beta1
+                kind: AuthenticationConfiguration
+                jwt:
+                - issuer:
+                    url: https://elma.id
+                    audiences:
+                    - ${cfg.elmaAudience}
+                    audienceMatchPolicy: MatchAny
+                  claimMappings:
+                    username:
+                      claim: "sub"
+                      prefix: "elma:"
+                    groups:
+                      claim: "groups"
+                      prefix: "elma:"
+              '';
+          };
         */
         "kubernetes/kubeadm-cp-init.yaml".text = ''
           ---
@@ -405,179 +380,29 @@ in
       };
     };
 
-    helsinki = {
-      #monitoring.hostConfig.vars.dns_resolver_enable = true;
+    # helsinki = {
+    #   #monitoring.hostConfig.vars.dns_resolver_enable = true;
 
-      # Single-node support
-      kubernetes.network.internal.extraNetworkdConfig =
-        lib.mkIf (cfg.network.cni == "cilium" && cfg.network.internal.interface == null)
-          {
-            address = [
-              "192.168.8.1/24"
-              "fd08:4e1:0::1/64"
-            ];
-          };
+    #   /*
+    #     disko.mountOptions."/" = lib.mkIf cfg.ceph.enable [ "dev" ];
 
-      /*
-      firewall = {
-        ports.tcp = lib.mkMerge [
-          (lib.mkIf (cfg.master.enable && cfg.network.internal.interface != null) [
-            {
-              ports = [
-                # etcd
-                2379
-                2380
-              ];
-              saddrs = cfg.master.hosts;
-              interfaces = [ internalInterfaceName ];
-            }
-            # apiserver
-            {
-              ports = [ 6443 ];
-              saddrs = [
-                "192.168.8.0/21" # nodes
-                "10.0.0.0/8" # pods/services
-              ];
-              interfaces = [ internalInterfaceName ];
-            }
-          ])
-          [
-            (lib.mkIf (cfg.master.enable && cfg.master.allowHelsinkiVpn) {
-              interfaces = [
-                "wg0"
-                "nb-helsinki"
-              ];
-              ports = [ 6443 ] ++ lib.optional cfg.haapi.enable 6444;
-            })
-          ]
-          (lib.mkIf (cfg.network.internal.interface != null) [
-            # kubelet API
-            {
-              ports = [ 10250 ];
-              interfaces = [ internalInterfaceName ];
-            }
-          ])
-          (lib.mkIf (cfg.network.ingress.interface != null) [
-            # kubelet API
-            {
-              ports = [
-                "http"
-                "https"
-              ];
-              interfaces = [ ingressInterfaceName ];
-            }
-          ])
-        ];
+    #     monitoring.hostConfig.vars.extra_filesystems_ignore_dests = [
+    #       "^${config.services.kubernetes.dataDir}/plugins/.*"
+    #       "^${config.services.kubernetes.dataDir}/pods/.*"
+    #       "^/run/containerd/.*"
+    #     ];
 
-        # Flannel Wireguard
-        ports.udp = lib.mkIf (cfg.network.cni == "flannel" && cfg.network.internal.interface != null) [
-          {
-            ports = [ 51820 ];
-            interfaces = [ internalInterfaceName ];
-          }
-        ];
+    #     heb = {
+    #       paths = [ "/etc/kubernetes/" ];
+    #       excludes = [
+    #         "${config.services.kubernetes.dataDir}/"
+    #         "/var/lib/containerd/"
+    #       ];
+    #     };
+    #   */
 
-        v4 = {
-          input.preRules = lib.mkBefore [
-            # Disables FIB blocking set by the VPN module
-            (lib.mkIf (cfg.network.cni == "flannel") "iifname cni0 accept")
-            (lib.mkIf (cfg.network.cni == "cilium") "iifname lxc* accept")
-            (lib.mkIf (
-              cfg.network.cni == "cilium"
-            ) "iifname cilium_vxlan ip daddr 10.0.0.0/8 ip daddr 10.0.0.0/8 accept")
-            # health checks and metrics
-            (lib.mkIf (cfg.network.cni == "cilium")
-              "iifname { cilium_wg0, ${internalInterfaceName} } tcp dport { 4240, 910, 9100, 9962-9965 } accept"
-            )
-            # VXLAN
-            (lib.mkIf (cfg.network.cni == "cilium") "iifname cilium_wg0 udp dport 8472 accept")
-            # Wireguard
-            (lib.mkIf (cfg.network.cni == "cilium") "iifname ${internalInterfaceName} udp dport 51871 accept")
-
-            # Nginx ingress controller admission
-            (lib.mkIf (cfg.network.cni == "cilium") "iifname ${internalInterfaceName} tcp dport 8443 accept")
-
-            # Flannel
-            (lib.mkIf (cfg.network.cni == "flannel" && cfg.network.internal.interface != null)
-              "iifname ${internalInterfaceName} ip saddr { ${lib.concatStringsSep ", " cfg.master.hosts} } tcp sport 6443 accept"
-            )
-            (lib.mkIf (cfg.network.cni == "flannel") "iifname flannel-wg ip saddr 10.0.0.0/8 accept") # idk why. has something to do with the webhooks
-            (lib.mkIf (
-              cfg.network.cni == "flannel"
-            ) "iifname flannel-wg ip saddr 10.0.0.0/8 udp sport 53 accept") # idk why
-            (lib.mkIf (
-              cfg.network.cni == "flannel" && cfg.network.internal.interface != null
-            ) "iifname ${internalInterfaceName} ip saddr 10.0.0.0/8 tcp sport 443 accept") # idk why
-          ];
-
-          forward.postRules =
-            (lib.optionals (cfg.network.cni == "cilium") [
-              "iifname { cilium_net, cilium_host } oifname cilium_host accept"
-            ])
-            ++ (lib.optionals (cfg.network.cni == "flannel") [
-              # Pods to Foreign CPs (for CP nodes) or to any CP (for worker nodes).
-              # Also allows access to port 10250 which is the kubelet API for the metrics server
-              "iifname { cni0, flannel-wg } ip daddr 192.168.8.0/24 tcp dport { 443, 6443, 10250 } accept"
-              "iifname flannel-wg oifname cni0 accept" # inter-pod communication
-            ])
-            ++
-              # Allow traffic between pods
-              (lib.optional (
-                cfg.network.cni == "flannel"
-              ) "ip saddr 10.0.0.0/8 ip daddr 10.0.0.0/8 iifname cni0 accept")
-            ++ [
-              # Allow access to our DNS
-              "ip saddr 10.244.0.0/16 ip daddr { ${
-                lib.concatStringsSep ", " (
-                  lib.take 3 (lib.filter (x: !(lib.hasInfix ":" x)) config.networking.nameservers)
-                )
-              } } udp dport 53 accept"
-              # For troubleshooting forwarding errors
-              "log prefix \"Forward drop: \""
-            ];
-        };
-
-        # v6 is only available with Cilium
-        v6 = lib.mkIf (cfg.network.cni == "cilium") {
-          input.preRules = lib.mkBefore [
-            # Disables FIB blocking set by the VPN module
-            "iifname lxc* accept"
-          ];
-          forward.postRules = [
-            "iifname {cilium_net, cilium_host } oifname cilium_host accept"
-            # Allow access to our DNS
-            "ip6 saddr fd08:4e1::/32 ip6 daddr { ${
-              lib.concatStringsSep ", " (
-                lib.take 3 (lib.filter (x: (lib.hasInfix ":" x)) config.networking.nameservers)
-              )
-            } } udp dport 53 accept"
-            # For troubleshooting forwarding errors
-            "log prefix \"Forward drop: \""
-          ];
-        };
-      };
-      */
-
-      /*
-      disko.mountOptions."/" = lib.mkIf cfg.ceph.enable [ "dev" ];
-
-      monitoring.hostConfig.vars.extra_filesystems_ignore_dests = [
-        "^${config.services.kubernetes.dataDir}/plugins/.*"
-        "^${config.services.kubernetes.dataDir}/pods/.*"
-        "^/run/containerd/.*"
-      ];
-
-      heb = {
-        paths = [ "/etc/kubernetes/" ];
-        excludes = [
-          "${config.services.kubernetes.dataDir}/"
-          "/var/lib/containerd/"
-        ];
-      };
-      */
-
-      # TODO promtail
-    };
+    #   # TODO promtail
+    # };
 
     # Workaround: https://github.com/ceph/ceph/pull/60006#issuecomment-2834332814
     services.udev.extraRules =
@@ -603,93 +428,78 @@ in
           "|/etc/kubernetes/kubelet.conf"
         ];
 
-        # The default preStart will remove the Cilium CNI :/
-        preStart = lib.mkIf (cfg.network.cni == "cilium") (
-          lib.mkForce ''
-            ${lib.concatMapStrings (img: ''
-              echo "Seeding container image: ${img}"
-              ${
-                if (lib.hasSuffix "gz" img) then
-                  ''${pkgs.gzip}/bin/zcat "${img}" | ${pkgs.containerd}/bin/ctr -n k8s.io image import -''
-                else
-                  ''${pkgs.coreutils}/bin/cat "${img}" | ${pkgs.containerd}/bin/ctr -n k8s.io image import -''
-              }
-            '') config.services.kubernetes.kubelet.seedDockerImages}
-          ''
-        );
+        /*
+                apparmor = {
+                  enable = false;
+                  extraConfig = ''
+                    ${config.environment.etc.os-release.source} r,
+                    /dev/disk/** r,
+                    /dev/kmsg rw,
+                    /etc/machine-id r,
+                    /run/containerd/containerd.sock rw,
+                    /run/mount/utab r,
+                    /run/systemd/private rw,
+                    /run/dbus/system_bus_socket rw,
+                    /run/xtables.lock rwklm,
+                    /sys/** r, # It really needs a lot of info
+                    /sys/fs/cgroup/** rwklm,
+                    @{PROC}/diskstats r,
+                    @{PROC}/loadavg r,
+                    @{PROC}/swaps r,
+                    @{PROC}/sys/kernel/** r, # It really needs a lot of info
+                    @{PROC}/sys/kernel/panic rw,
+                    @{PROC}/sys/vm/** r, # It really needs a lot of info
+                    @{PROC}/sys/vm/overcommit_memory rw,
+                    @{PROC}@{pid}/** rw,
+                    deny /nix/store/ r,
 
-/*
-        apparmor = {
-          enable = false;
-          extraConfig = ''
-            ${config.environment.etc.os-release.source} r,
-            /dev/disk/** r,
-            /dev/kmsg rw,
-            /etc/machine-id r,
-            /run/containerd/containerd.sock rw,
-            /run/mount/utab r,
-            /run/systemd/private rw,
-            /run/dbus/system_bus_socket rw,
-            /run/xtables.lock rwklm,
-            /sys/** r, # It really needs a lot of info
-            /sys/fs/cgroup/** rwklm,
-            @{PROC}/diskstats r,
-            @{PROC}/loadavg r,
-            @{PROC}/swaps r,
-            @{PROC}/sys/kernel/** r, # It really needs a lot of info
-            @{PROC}/sys/kernel/panic rw,
-            @{PROC}/sys/vm/** r, # It really needs a lot of info
-            @{PROC}/sys/vm/overcommit_memory rw,
-            @{PROC}@{pid}/** rw,
-            deny /nix/store/ r,
+                    # This would normally be in ReadWritePaths, but that would create a new
+                    # mount namespace which would prevent us from doing containerd things
+                    /etc/kubernetes/** rwklm,
+                    /opt/cni/bin/ r,
+                    /opt/cni/bin/** rwklm,
+                    ${config.services.kubernetes.dataDir}/** rwklm,
+                    /var/log/pods/ r,
+                    /var/log/pods/** rwklm,
+                    /var/log/containers/ r,
+                    /var/log/containers/** rwklm,
+                    /usr/libexec/** rwklm,
+                    /tmp/** rwixklm,
+                    /run/current-system/kernel-modules/lib/modules/** r,
+                    /run/booted-system/kernel-modules/lib/modules/** r,
+                    /nix/store/** r,
+                    ${lib.optionalString cfg.openebs.enable ''
+                      /home/keys/ rwklm,
+                      /home/keys/** rwklm,
+                      /var/openebs/** rwklm,
+                      /var/openebs/local/** rwklm,
+                      /var/local/openebs/io-engine/ rwklm,
+                      /var/local/openebs/io-engine/** rwklm,
+                      /sys/kernel/mm/hugepages/ r,
+                      /sys/kernel/mm/hugepages/** r,
+                    ''}
 
-            # This would normally be in ReadWritePaths, but that would create a new
-            # mount namespace which would prevent us from doing containerd things
-            /etc/kubernetes/** rwklm,
-            /opt/cni/bin/ r,
-            /opt/cni/bin/** rwklm,
-            ${config.services.kubernetes.dataDir}/** rwklm,
-            /var/log/pods/ r,
-            /var/log/pods/** rwklm,
-            /var/log/containers/ r,
-            /var/log/containers/** rwklm,
-            /usr/libexec/** rwklm,
-            /tmp/** rwixklm,
-            /run/current-system/kernel-modules/lib/modules/** r,
-            /run/booted-system/kernel-modules/lib/modules/** r,
-            /nix/store/** r,
-            ${lib.optionalString cfg.openebs.enable ''
-              /home/keys/ rwklm,
-              /home/keys/** rwklm,
-              /var/openebs/** rwklm,
-              /var/openebs/local/** rwklm,
-              /var/local/openebs/io-engine/ rwklm,
-              /var/local/openebs/io-engine/** rwklm,
-              /sys/kernel/mm/hugepages/ r,
-              /sys/kernel/mm/hugepages/** r,
-            ''}
+                    capability chown,
+                    capability dac_override,
+                    capability dac_read_search,
+                    capability fowner,
+                    capability net_admin,
+                    capability sys_admin,
+                    capability sys_ptrace,
+                    capability sys_resource,
+                    capability syslog,
 
-            capability chown,
-            capability dac_override,
-            capability dac_read_search,
-            capability fowner,
-            capability net_admin,
-            capability sys_admin,
-            capability sys_ptrace,
-            capability sys_resource,
-            capability syslog,
+                    ptrace (read, readby) peer=@{profile_name},
+                    ptrace (read, readby) peer=unconfined, # whatever
 
-            ptrace (read, readby) peer=@{profile_name},
-            ptrace (read, readby) peer=unconfined, # whatever
+                    mount ${config.services.kubernetes.dataDir}/pods/**,
+                    umount ${config.services.kubernetes.dataDir}/pods/**,
 
-            mount ${config.services.kubernetes.dataDir}/pods/**,
-            umount ${config.services.kubernetes.dataDir}/pods/**,
-
-            network udp,
-            network tcp,
-            network netlink raw,
-          '';
-        };
+                    network udp,
+                    network tcp,
+                    network netlink raw,
+                  '';
+                };
         */
       };
     };
@@ -711,20 +521,22 @@ in
         addACL("[::]/0")
 
         -- Add servers
-      ''/*
-      + lib.concatMapStringsSep "\n" (
-        hostname: # lua
-        ''
-          newServer({
-              address="${lib.head helsinkiLib.hosts."${hostname}".v6}",
-              name="${lib.removeSuffix config.helsinki.wg.helsinki.meta.dnsSuffix hostname}",
-              useClientSubnet=true,
-              -- Health check
-              checkInterval=10,
-              mustResolve=true
-          })
-        '') config.helsinki.wg.helsinki.meta.resolverHosts
-      # lua*/
+      ''
+      /*
+        + lib.concatMapStringsSep "\n" (
+          hostname: # lua
+          ''
+            newServer({
+                address="${lib.head helsinkiLib.hosts."${hostname}".v6}",
+                name="${lib.removeSuffix config.helsinki.wg.helsinki.meta.dnsSuffix hostname}",
+                useClientSubnet=true,
+                -- Health check
+                checkInterval=10,
+                mustResolve=true
+            })
+          '') config.helsinki.wg.helsinki.meta.resolverHosts
+        # lua
+      */
       + ''
         -- create pool
         getPool("kubernetes")
@@ -767,22 +579,6 @@ in
 
       # Dummy interface for single-node clusters
       network.netdevs = lib.mkMerge [
-        (lib.mkIf
-          (
-            (!cfg.network.dontConfigureNetworkd)
-            && cfg.network.cni == "cilium"
-            && cfg.network.internal.interface == null
-          )
-          {
-            "10-single-node-dummy" = {
-              netdevConfig = {
-                Name = "dummy0";
-                Kind = "dummy";
-              };
-            };
-          }
-        )
-
         (lib.mkIf ((!cfg.network.dontConfigureNetworkd) && cfg.network.internal.vlanId != null) (
           lib.listToAttrs [
             (helsinkiLib.networkd.vlanToNetdev cfg.network.internal.interface "" {

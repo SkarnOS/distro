@@ -1,3 +1,4 @@
 {
-  flake.nixosModules."kubernetes" = ./kubernetes.nix;
+  flake.nixosModules."kubernetes" = ./kubernetes;
+  flake.nixosModules."helsinkiKubernetes" = ./helsinkiKubernetes.nix;
 }
