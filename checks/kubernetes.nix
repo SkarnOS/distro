@@ -46,6 +46,8 @@ testers.nixosTest {
         diskSize = 4096;
       };
 
+      services.kubernetes.package = kubernetes;
+
       rename-me.kubernetes = {
         enable = true;
         network = {
