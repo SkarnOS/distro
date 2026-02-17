@@ -1,303 +1,302 @@
 {
-  "1.35": "1.35.0",
-  "1.35.0": {
-    "version": "1.35.0",
-    "hash": "sha256-AT1/4RhnVK/mAoNVqPIfSwbzD8VNRqKumOpE0fidJ74=",
-    "is_maintained": true,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "quay.io/cilium/operator-generic": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.13.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.35.0",
-      "registry.k8s.io/kube-controller-manager": "v1.35.0",
-      "registry.k8s.io/kube-scheduler": "v1.35.0",
-      "registry.k8s.io/pause": "3.10.1"
+    "1.35": "1.35.1",
+    "1.35.1": {
+        "version": "1.35.1",
+        "hash": "sha256-Y5ixQgAdtMBUs/nfPOOdu4pp9uOh/Cr57HO/Owf7PwI=",
+        "is_maintained": true,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.35.1",
+            "registry.k8s.io/kube-controller-manager": "1.35.1",
+            "registry.k8s.io/kube-scheduler": "1.35.1",
+            "registry.k8s.io/pause": "1.35.1",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.13.1",
+            "registry.k8s.io/etcd": "3.5.24-0"
+        }
+    },
+    "1.34": "1.34.4",
+    "1.34.4": {
+        "version": "1.34.4",
+        "hash": "sha256-kw992zj4VrpsuGgBtGD92ok3QoNcl4K42rOJVv+9BJc=",
+        "is_maintained": true,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.34.4",
+            "registry.k8s.io/kube-controller-manager": "1.34.4",
+            "registry.k8s.io/kube-scheduler": "1.34.4",
+            "registry.k8s.io/pause": "1.34.4",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.12.1",
+            "registry.k8s.io/etcd": "3.5.24-0"
+        }
+    },
+    "1.33": "1.33.8",
+    "1.33.8": {
+        "version": "1.33.8",
+        "hash": "sha256-Ghx3bg7xHqj5Vb+wZZH28VQtvd+ThqQ+Tg7/GdQTJJg=",
+        "is_maintained": true,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.33.8",
+            "registry.k8s.io/kube-controller-manager": "1.33.8",
+            "registry.k8s.io/kube-scheduler": "1.33.8",
+            "registry.k8s.io/pause": "1.33.8",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.12.0",
+            "registry.k8s.io/etcd": "3.5.24-0"
+        }
+    },
+    "1.32": "1.32.12",
+    "1.32.12": {
+        "version": "1.32.12",
+        "hash": "sha256-aaFSdGJmcJqkgmu5myg7b3Gq0vVIYXUIm4kC+TPLi38=",
+        "is_maintained": true,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.32.12",
+            "registry.k8s.io/kube-controller-manager": "1.32.12",
+            "registry.k8s.io/kube-scheduler": "1.32.12",
+            "registry.k8s.io/pause": "1.32.12",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.11.3",
+            "registry.k8s.io/etcd": "3.5.24-0"
+        }
+    },
+    "1.31": "1.31.14",
+    "1.31.14": {
+        "version": "1.31.14",
+        "hash": "sha256-rfYv9VlXKdQNcR1AiMv7wVeyJYHq5qJPw9g15sn3U40=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.31.14",
+            "registry.k8s.io/kube-controller-manager": "1.31.14",
+            "registry.k8s.io/kube-scheduler": "1.31.14",
+            "registry.k8s.io/pause": "1.31.14",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.11.3",
+            "registry.k8s.io/etcd": "3.5.24-0"
+        }
+    },
+    "1.30": "1.30.14",
+    "1.30.14": {
+        "version": "1.30.14",
+        "hash": "sha256-Jljy9wkAZlJ/WhIQ/9tBFjNYdrmV90dsoijg6Xrgv7I=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.30.14",
+            "registry.k8s.io/kube-controller-manager": "1.30.14",
+            "registry.k8s.io/kube-scheduler": "1.30.14",
+            "registry.k8s.io/pause": "1.30.14",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.11.3",
+            "registry.k8s.io/etcd": "3.4.13-4"
+        }
+    },
+    "1.29": "1.29.15",
+    "1.29.15": {
+        "version": "1.29.15",
+        "hash": "sha256-mUgXSiXNgD5uSQJSsJxG8UzUcyMe4ZKtijOz6/UKiPk=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.29.15",
+            "registry.k8s.io/kube-controller-manager": "1.29.15",
+            "registry.k8s.io/kube-scheduler": "1.29.15",
+            "registry.k8s.io/pause": "1.29.15",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.11.1",
+            "registry.k8s.io/etcd": "3.4.13-4"
+        }
+    },
+    "1.28": "1.28.15",
+    "1.28.15": {
+        "version": "1.28.15",
+        "hash": "sha256-E9NO9L1pV5Whn/H3/Kst4u+7B9Qx63A9bGRBrE21nDE=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.28.15",
+            "registry.k8s.io/kube-controller-manager": "1.28.15",
+            "registry.k8s.io/kube-scheduler": "1.28.15",
+            "registry.k8s.io/pause": "1.28.15",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.10.1",
+            "registry.k8s.io/etcd": "3.4.13-4"
+        }
+    },
+    "1.27": "1.27.16",
+    "1.27.16": {
+        "version": "1.27.16",
+        "hash": "sha256-ksMqlJwc8dNj8kF8U2jKM7/U9Yyq9aGFks9/D9tOz2c=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.27.16",
+            "registry.k8s.io/kube-controller-manager": "1.27.16",
+            "registry.k8s.io/kube-scheduler": "1.27.16",
+            "registry.k8s.io/pause": "1.27.16",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.10.1",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.26": "1.26.15",
+    "1.26.15": {
+        "version": "1.26.15",
+        "hash": "sha256-zegGiZM3nCxbYzwtTTgbzphAerdigSyxESpmmK3HSgI=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.26.15",
+            "registry.k8s.io/kube-controller-manager": "1.26.15",
+            "registry.k8s.io/kube-scheduler": "1.26.15",
+            "registry.k8s.io/pause": "1.26.15",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.9.3",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.25": "1.25.16",
+    "1.25.16": {
+        "version": "1.25.16",
+        "hash": "sha256-Je+PeMF7Ivg5gD/y8l0piXfO60/TClz28lyvyyCnXkA=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.25.16",
+            "registry.k8s.io/kube-controller-manager": "1.25.16",
+            "registry.k8s.io/kube-scheduler": "1.25.16",
+            "registry.k8s.io/pause": "1.25.16",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.9.3",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.24": "1.24.17",
+    "1.24.17": {
+        "version": "1.24.17",
+        "hash": "sha256-js0NhYL5WCvlufEyYUvk9xVlbU7minpinn7w/QY+CnA=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.24.17",
+            "registry.k8s.io/kube-controller-manager": "1.24.17",
+            "registry.k8s.io/kube-scheduler": "1.24.17",
+            "registry.k8s.io/pause": "1.24.17",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.8.6",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.23": "1.23.17",
+    "1.23.17": {
+        "version": "1.23.17",
+        "hash": "sha256-H1HuA+eJzYNRIxscJpimH/AKFJM/ijOd8yrN9E/PZQ8=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.23.17",
+            "registry.k8s.io/kube-controller-manager": "1.23.17",
+            "registry.k8s.io/kube-scheduler": "1.23.17",
+            "registry.k8s.io/pause": "1.23.17",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.8.6",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.22": "1.22.17",
+    "1.22.17": {
+        "version": "1.22.17",
+        "hash": "sha256-T4DUleHYNWHtdIJAsdroBDiDuiQzOmySBhF+RVoC/38=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.22.17",
+            "registry.k8s.io/kube-controller-manager": "1.22.17",
+            "registry.k8s.io/kube-scheduler": "1.22.17",
+            "registry.k8s.io/pause": "1.22.17",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.8.4",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.21": "1.21.14",
+    "1.21.14": {
+        "version": "1.21.14",
+        "hash": "sha256-6LxkLqQMmCncndd4RXLmN04su2IsBXQDWMB7NYoG4is=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.21.14",
+            "registry.k8s.io/kube-controller-manager": "1.21.14",
+            "registry.k8s.io/kube-scheduler": "1.21.14",
+            "registry.k8s.io/pause": "1.21.14",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "v1.8.0",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.20": "1.20.15",
+    "1.20.15": {
+        "version": "1.20.15",
+        "hash": "sha256-FVUfIXLQdJrqUP44zxPuZn9BG1jkZR1IeABY5wK+1f0=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.20.15",
+            "registry.k8s.io/kube-controller-manager": "1.20.15",
+            "registry.k8s.io/kube-scheduler": "1.20.15",
+            "registry.k8s.io/pause": "1.20.15",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "1.7.0",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.19": "1.19.16",
+    "1.19.16": {
+        "version": "1.19.16",
+        "hash": "sha256-mrP526J29Pjna+TYM6SBMCwSMltm+irfYDec0zgZLrA=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.19.16",
+            "registry.k8s.io/kube-controller-manager": "1.19.16",
+            "registry.k8s.io/kube-scheduler": "1.19.16",
+            "registry.k8s.io/pause": "1.19.16",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "1.7.0",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.18": "1.18.20",
+    "1.18.20": {
+        "version": "1.18.20",
+        "hash": "sha256-5tCnt37sFaTQPlO5SZZ0muftVSI6sZ29YVfCvlPF+V4=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.18.20",
+            "registry.k8s.io/kube-controller-manager": "1.18.20",
+            "registry.k8s.io/kube-scheduler": "1.18.20",
+            "registry.k8s.io/pause": "1.18.20",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "1.6.7",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.17": "1.17.17",
+    "1.17.17": {
+        "version": "1.17.17",
+        "hash": "sha256-0CF6N+ZmJ0jH48ThmByUxrY4Xb50cC2wBhHulvzjt1A=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.17.17",
+            "registry.k8s.io/kube-controller-manager": "1.17.17",
+            "registry.k8s.io/kube-scheduler": "1.17.17",
+            "registry.k8s.io/pause": "1.17.17",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "1.6.5",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
+    },
+    "1.16": "1.16.15",
+    "1.16.15": {
+        "version": "1.16.15",
+        "hash": "sha256-kEOeCuMgfOdkoukTi3Kuma1fpTNJXsol0a2lOOMUKlc=",
+        "is_maintained": false,
+        "containers": {
+            "registry.k8s.io/kube-apiserver": "1.16.15",
+            "registry.k8s.io/kube-controller-manager": "1.16.15",
+            "registry.k8s.io/kube-scheduler": "1.16.15",
+            "registry.k8s.io/pause": "1.16.15",
+            "quay.io/cilium/cilium": "v1.18.2",
+            "registry.k8s.io/coredns/coredns": "1.6.2",
+            "registry.k8s.io/etcd": "3.2.18"
+        }
     }
-  },
-  "1.34": "1.34.3",
-  "1.34.3": {
-    "version": "1.34.3",
-    "hash": "sha256-1X2kxUi7jNnyTNo+ZGZmhU5DHVl98eYOrJ4qpjzqqjE=",
-    "is_maintained": true,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.33": "1.33.7",
-  "1.33.7": {
-    "version": "1.33.7",
-    "hash": "sha256-439MCwbt6XRhKi+6wbyro33ptS//uIv0TeL2NQ/tD7M=",
-    "is_maintained": true,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.32": "1.32.11",
-  "1.32.11": {
-    "version": "1.32.11",
-    "hash": "sha256-/Hg0yf7Y8My+g3w36fA94ozCzhmI0sMjpF7FPZ/UykY=",
-    "is_maintained": true,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.31": "1.31.14",
-  "1.31.14": {
-    "version": "1.31.14",
-    "hash": "sha256-rfYv9VlXKdQNcR1AiMv7wVeyJYHq5qJPw9g15sn3U40=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.30": "1.30.14",
-  "1.30.14": {
-    "version": "1.30.14",
-    "hash": "sha256-Jljy9wkAZlJ/WhIQ/9tBFjNYdrmV90dsoijg6Xrgv7I=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.29": "1.29.15",
-  "1.29.15": {
-    "version": "1.29.15",
-    "hash": "sha256-mUgXSiXNgD5uSQJSsJxG8UzUcyMe4ZKtijOz6/UKiPk=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.28": "1.28.15",
-  "1.28.15": {
-    "version": "1.28.15",
-    "hash": "sha256-E9NO9L1pV5Whn/H3/Kst4u+7B9Qx63A9bGRBrE21nDE=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.27": "1.27.16",
-  "1.27.16": {
-    "version": "1.27.16",
-    "hash": "sha256-ksMqlJwc8dNj8kF8U2jKM7/U9Yyq9aGFks9/D9tOz2c=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.26": "1.26.15",
-  "1.26.15": {
-    "version": "1.26.15",
-    "hash": "sha256-zegGiZM3nCxbYzwtTTgbzphAerdigSyxESpmmK3HSgI=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.25": "1.25.16",
-  "1.25.16": {
-    "version": "1.25.16",
-    "hash": "sha256-Je+PeMF7Ivg5gD/y8l0piXfO60/TClz28lyvyyCnXkA=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.24": "1.24.17",
-  "1.24.17": {
-    "version": "1.24.17",
-    "hash": "sha256-js0NhYL5WCvlufEyYUvk9xVlbU7minpinn7w/QY+CnA=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.23": "1.23.17",
-  "1.23.17": {
-    "version": "1.23.17",
-    "hash": "sha256-H1HuA+eJzYNRIxscJpimH/AKFJM/ijOd8yrN9E/PZQ8=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.22": "1.22.17",
-  "1.22.17": {
-    "version": "1.22.17",
-    "hash": "sha256-T4DUleHYNWHtdIJAsdroBDiDuiQzOmySBhF+RVoC/38=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.21": "1.21.14",
-  "1.21.14": {
-    "version": "1.21.14",
-    "hash": "sha256-6LxkLqQMmCncndd4RXLmN04su2IsBXQDWMB7NYoG4is=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.20": "1.20.15",
-  "1.20.15": {
-    "version": "1.20.15",
-    "hash": "sha256-FVUfIXLQdJrqUP44zxPuZn9BG1jkZR1IeABY5wK+1f0=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.19": "1.19.16",
-  "1.19.16": {
-    "version": "1.19.16",
-    "hash": "sha256-mrP526J29Pjna+TYM6SBMCwSMltm+irfYDec0zgZLrA=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.18": "1.18.20",
-  "1.18.20": {
-    "version": "1.18.20",
-    "hash": "sha256-5tCnt37sFaTQPlO5SZZ0muftVSI6sZ29YVfCvlPF+V4=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.17": "1.17.17",
-  "1.17.17": {
-    "version": "1.17.17",
-    "hash": "sha256-0CF6N+ZmJ0jH48ThmByUxrY4Xb50cC2wBhHulvzjt1A=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  },
-  "1.16": "1.16.15",
-  "1.16.15": {
-    "version": "1.16.15",
-    "hash": "sha256-kEOeCuMgfOdkoukTi3Kuma1fpTNJXsol0a2lOOMUKlc=",
-    "is_maintained": false,
-    "containers": {
-      "quay.io/cilium/cilium": "v1.18.2",
-      "registry.k8s.io/coredns/coredns": "v1.12.1",
-      "registry.k8s.io/etcd": "3.6.6-0",
-      "registry.k8s.io/kube-apiserver": "v1.34.3",
-      "registry.k8s.io/kube-controller-manager": "v1.34.3",
-      "registry.k8s.io/kube-scheduler": "v1.34.3",
-      "registry.k8s.io/pause": "3.10.1"
-    }
-  }
 }

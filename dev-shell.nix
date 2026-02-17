@@ -9,6 +9,7 @@
           pkgs.nix-prefetch-docker
           pkgs.nix-eval-jobs
           pkgs.nix-fast-build
+          pkgs.cilium-cli
           (pkgs.python3.withPackages (ps: [
             ps.pydantic
             ps.requests
