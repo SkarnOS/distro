@@ -11,25 +11,7 @@ import asyncio
 import operator
 import re
 
-class ImageSpec(BaseModel):
-    hash: str
-    digest: str
-
-ImageVersions = dict[str, ImageSpec]
-Images = dict[str, ImageVersions]
-
-class FlattenedImage(ImageSpec):
-    name: str
-    tag: str
-
-    def to_image(self) -> ImageSpec:
-        return ImageSpec(
-            hash = self.hash,
-            digest = self.digest
-        )
-
-class SkopeoImageInfo(BaseModel):
-    digest: str = Field(alias = "Digest")
+from base_types import *
 
 async def get_image_digest(tmpdir: str, flattened_image: FlattenedImage):
     process = await asyncio.create_subprocess_exec(
@@ -73,14 +55,15 @@ async def nix_build(tmpdir: str, flattened_image: FlattenedImage):
         print(stderr)
         return None
 
-def get_image_identifiers(images: Images) -> list[str]:
-    identifiers = []
+def print_image_identifiers(images: Images) -> str:
+    output: str = ""
 
     for name, versions in images.items():
+        output += f"{name}:\n"
         for tag, _ in versions.items():
-            identifiers.append(f"{name}@{tag}")
+            output += f"    {tag}\n"
 
-    return identifiers
+    return output
 
 def flatten_images(images: Images) -> list[FlattenedImage]:
     flattened_images = []
@@ -103,25 +86,32 @@ def unflatten_images(flattened_images: list[FlattenedImage]) -> Images:
 
     return images
 
-async def main():
+async def sync_image_versions():
     tmpdir = os.getcwd() + "/tmpdir"
     try:
         if not os.path.exists(tmpdir):
             os.mkdir(tmpdir)
 
-        with open("packages/images.json", "rb") as images_file:
-            images = TypeAdapter(Images).validate_json(images_file.read())
+        with open("packages/sources.json", "rb") as images_file:
+            sources = TypeAdapter(Sources).validate_json(images_file.read())
 
-        print(f"discovered images: {', '.join(get_image_identifiers(images))}")
+        images: Images = {}
+
+        for key, value in sources.items():
+            if isinstance(value, str):
+                continue
+
+            for image_name, image_version in value.containers.items():
+                images.setdefault(image_name, {})
+                images[image_name] |= { image_version: ImageSpec(hash = None, digest = None) }
+
+        print(print_image_identifiers(images))
 
         digests = await asyncio.gather(*map(lambda image: get_image_digest(tmpdir, image), flatten_images(images)))
         hashes = await asyncio.gather(*map(lambda image: nix_build(tmpdir, image), digests))
 
-        final_json = TypeAdapter(Images).dump_json(unflatten_images(hashes))
-
         with open("packages/images.json", "wb") as images_file:
+            final_json = TypeAdapter(Images).dump_json(unflatten_images(hashes), indent = 4)
             images_file.write(final_json)
     finally:
         shutil.rmtree(tmpdir)
-
-asyncio.run(main())

@@ -1,0 +1,12 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "version-tool"
+version = "0.0.1"
+authors = [
+  { name="Richard Brežák", email="richard@numtide.com" },
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]

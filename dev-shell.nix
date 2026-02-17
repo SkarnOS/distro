@@ -13,6 +13,7 @@
           (pkgs.python3.withPackages (ps: [
             ps.pydantic
             ps.requests
+            ps.semver
           ]))
         ];
       };
