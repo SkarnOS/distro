@@ -118,7 +118,7 @@ testers.nixosTest {
     ]))
 
     print(machine.succeed("cilium status --wait"))
-    # print(machine.succeed("cilium connectivity test"))
+    print(machine.succeed("cilium connectivity test"))
 
 
   '';
