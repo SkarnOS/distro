@@ -70,6 +70,7 @@ testers.nixosTest {
     from pathlib import Path
     from functools import reduce
     import operator
+    import time
 
     machine.wait_for_unit("multi-user.target")
     ${lib.concatMapStringsSep "\n" (
@@ -88,6 +89,11 @@ testers.nixosTest {
     )
 
     machine.succeed("kubeadm init --config /etc/kubernetes/kubeadm-cp-init.yaml --ignore-preflight-errors=all --upload-certs")
+
+    for i in range(10):
+      machine.succeed("kubectl get csr -o jsonpath='{.items[*].metadata.name}' | xargs kubectl certificate approve")
+      time.sleep(1)
+
     machine.succeed(" ".join([
       "cilium",
       "install",
