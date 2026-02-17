@@ -92,7 +92,7 @@ async def resolve_special_version(tmpdir: str, kubernetes_version: str, image: s
                     pattern = '''(?<=CoreDNSVersion = ")([^"]+)(?=")'''
                     constants_path += b"/cmd/kubeadm/app/constants/constants.go"
                 case SpecialVersion.DEFAULT_ETCD_VERSION:
-                    pattern = '''(?<=MinExternalEtcdVersion = ")([^"]+)(?=")'''
+                    pattern = '''(?<=DefaultEtcdVersion = ")([^"]+)(?=")'''
                     constants_path += b"/cmd/kubeadm/app/constants/constants.go"
                 case SpecialVersion.PAUSE_VERSION:
                     pattern = '''(?<=PauseVersion = ")([^"]+)(?=")'''
