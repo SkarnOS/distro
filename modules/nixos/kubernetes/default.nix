@@ -78,6 +78,11 @@ in
         default."cilium" = { };
       };
 
+      nameservers = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = lib.take 3 config.networking.nameservers;
+      };
+
       dontConfigureNetworkd = lib.mkOption {
         description = "Support for legacy clusters that do their own networkd configuration";
         type = lib.types.bool;
@@ -226,7 +231,7 @@ in
             # Only use 3 DNS servers to prevent annoying warning
             "--resolv-conf=${
               pkgs.writeText "kubelet-resolv.conf" (
-                lib.concatMapStringsSep "\n" (ns: "nameserver ${ns}") (lib.take 3 config.networking.nameservers)
+                lib.concatMapStringsSep "\n" (ns: "nameserver ${ns}") cfg.network.nameservers
               )
             }"
           ];
