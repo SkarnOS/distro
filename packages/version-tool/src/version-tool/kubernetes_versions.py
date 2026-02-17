@@ -22,6 +22,7 @@ containers = {
     "registry.k8s.io/kube-scheduler": SpecialVersion.KUBERNETES,
     "registry.k8s.io/pause": SpecialVersion.PAUSE_VERSION,
     "quay.io/cilium/cilium": "v1.18.2",
+    "quay.io/cilium/operator-generic": "v1.18.2",
     "registry.k8s.io/coredns/coredns": SpecialVersion.COREDNS_VERSION,
     "registry.k8s.io/etcd": SpecialVersion.DEFAULT_ETCD_VERSION
 }

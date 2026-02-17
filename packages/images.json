@@ -265,6 +265,12 @@
             "digest": "sha256:858f807ea4e20e85e3ea3240a762e1f4b29f1cb5bbd0463b8aa77e7b097c0667"
         }
     },
+    "quay.io/cilium/operator-generic": {
+        "v1.18.2": {
+            "hash": "sha256-ya87PbZaRmgLajp79jA+xbJGk04L5+4yWSqCYVhr/Aw=",
+            "digest": "sha256:cb4e4ffc5789fd5ff6a534e3b1460623df61cba00f5ea1c7b40153b5efb81805"
+        }
+    },
     "registry.k8s.io/coredns/coredns": {
         "v1.13.1": {
             "hash": "sha256-rgggCKSFk9v7GsTW+3c8GOPerbqgi/Xmtu5Dkkw+Y1k=",
