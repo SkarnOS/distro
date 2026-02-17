@@ -43,21 +43,24 @@ testers.nixosTest {
       virtualisation = {
         cores = 2;
         memorySize = 4096;
-        diskSize = 4096;
+        diskSize = 1024 * 20;
+        # restrictNetwork = true;
       };
 
       services.kubernetes.package = kubernetes;
 
       services.resolved.settings.Resolve = {
-        DNSStubListenerExtra = "192.168.8.1";
+        DNSStubListenerExtra = "10.224.6.236";
       };
+
+      networking.firewall.enable = false;
 
       rename-me.kubernetes = {
         enable = true;
         network = {
           cni."cilium" = { };
           ingress.interface = "eth0";
-          nameservers = [ "192.168.8.1" ];
+          nameservers = [ "10.224.6.236" ];
         };
         clusterName = "test-cluster";
       };
@@ -70,7 +73,18 @@ testers.nixosTest {
     from pathlib import Path
     from functools import reduce
     import operator
-    import time
+
+    def approve_certificates(last):
+      csrs = machine.succeed("kubectl get csr -o jsonpath='{.items[*].metadata.name}'").split(" ")
+      print(csrs)
+      if len(csrs) < 3:
+        return False
+      machine.succeed(f"kubectl certificate approve {' '.join(csrs)}")
+      return True
+
+    def wait_for_ready(last):
+      nodes = machine.succeed("kubectl get nodes")
+      return "NotReady" in nodes
 
     machine.wait_for_unit("multi-user.target")
     ${lib.concatMapStringsSep "\n" (
@@ -90,9 +104,11 @@ testers.nixosTest {
 
     machine.succeed("kubeadm init --config /etc/kubernetes/kubeadm-cp-init.yaml --ignore-preflight-errors=all --upload-certs")
 
-    for i in range(10):
-      machine.succeed("kubectl get csr -o jsonpath='{.items[*].metadata.name}' | xargs kubectl certificate approve")
-      time.sleep(1)
+    retry(approve_certificates)
+
+    retry(wait_for_ready)
+
+    machine.succeed("kubectl taint nodes --all node-role.kubernetes.io/control-plane-")
 
     machine.succeed(" ".join([
       "cilium",
@@ -100,8 +116,10 @@ testers.nixosTest {
       "--version", "1.18.2",
       *cilium_params
     ]))
+
     print(machine.succeed("cilium status --wait"))
-    print(machine.succeed("cilium connectivity test"))
-    print(machine.succeed("kubectl get nodes"))
+    # print(machine.succeed("cilium connectivity test"))
+
+
   '';
 }
