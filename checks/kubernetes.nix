@@ -48,14 +48,18 @@ testers.nixosTest {
 
       services.kubernetes.package = kubernetes;
 
+      services.resolved.settings.Resolve = {
+        DNSStubListenerExtra = "192.168.8.1";
+      };
+
       rename-me.kubernetes = {
         enable = true;
         network = {
           cni."cilium" = { };
           ingress.interface = "eth0";
+          nameservers = [ "192.168.8.1" ];
         };
-        clusterName = "machine";
-
+        clusterName = "test-cluster";
       };
 
       system.stateVersion = "25.11";
