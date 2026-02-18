@@ -20,7 +20,20 @@ let
     "encryption.type" = "wireguard";
     "k8sServiceHost" = "127.0.0.1";
     "image.useDigest" = "false";
+    "certgen.useDigest" = "false";
+    "hubble.relay.image.useDigest" = "false";
+    "hubble.ui.backend.useDigest" = "false";
+    "hubble.ui.frontend.useDigest" = "false";
+    "envoy.image.useDigest" = "false";
     "operator.image.useDigest" = "false";
+    "nodeinit.image.useDigest" = "false";
+    "preflight.image.useDigest" = "false";
+    "preflight.envoy.image.useDigest" = "false";
+    "clustermesh.apiserver.image.useDigest" = "false";
+    "authentication.mutual.spire.install.initImage.useDigest" = "false";
+    "authentication.mutual.spire.install.agent.image.useDigest" = "false";
+    "authentication.mutual.spire.install.server.image.useDigest" = "false";
+    "standaloneDnsProxy.image.useDigest" = "false";
   };
 in
 testers.nixosTest {
