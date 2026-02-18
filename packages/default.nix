@@ -21,7 +21,7 @@
                 };
 
                 containers = lib.mkOption {
-                  type = lib.types.attrsOf lib.types.str;
+                  type = lib.types.attrsOf (lib.types.listOf lib.types.str);
                 };
               };
             }
@@ -69,7 +69,9 @@
             lib.nameValuePair (lib.replaceString "." "_" name) (
               pkgs.callPackage ./kubernetes.nix {
                 inherit version hash is_maintained;
-                containers = lib.mapAttrs (name: tag: config.legacyPackages.ociImages.${name}.${tag}) containers;
+                containers = lib.mapAttrs (
+                  name: tags: lib.map (tag: config.legacyPackages.ociImages.${name}.${tag}) tags
+                ) containers;
               }
             )
           ))

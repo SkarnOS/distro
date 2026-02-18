@@ -1,10 +1,10 @@
+{ inputs }:
 {
   config,
   options,
   pkgs,
   lib,
   helsinkiLib,
-  inputs',
   ...
 }:
 
@@ -75,7 +75,7 @@ in
             type = lib.types.submodule {
               options = {
                 package = lib.mkPackageOption pkgs "cilium-cli" { } // {
-                  default = inputs'.legacyPackages.cilium-cli;
+                  default = inputs.self.legacyPackages.${pkgs.hostPlatform.system}.cilium-cli;
                 };
               };
             };

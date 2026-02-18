@@ -98,9 +98,9 @@ testers.nixosTest {
     machine.wait_for_unit("multi-user.target")
     ${lib.concatMapStringsSep "\n" (
       { name, value }:
-      ''
+      lib.concatMapStringsSep "\n" (value: ''
         machine.succeed("${lib.getExe' containerd "ctr"} -n k8s.io image import ${value}")
-      ''
+      '') value
     ) (lib.mapAttrsToList lib.nameValuePair kubernetes.passthru.containers)}
 
     cilium_params: list[str] = reduce(
