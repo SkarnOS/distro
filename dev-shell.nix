@@ -14,6 +14,7 @@
             ps.pydantic
             ps.requests
             ps.semver
+            ps.async-lru
           ]))
         ];
       };

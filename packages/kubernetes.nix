@@ -18,6 +18,7 @@
   hash,
   is_maintained,
   containers,
+  cilium_image_version,
 }:
 let
   binariesFilter = ''
@@ -147,7 +148,7 @@ lib.fix (
     '';
 
     passthru = {
-      inherit is_maintained containers;
+      inherit is_maintained containers cilium_image_version;
     };
 
     meta = {

@@ -3,6 +3,7 @@ from datetime import datetime, date
 from pydantic import BaseModel, TypeAdapter
 from pathlib import Path
 from functools import reduce
+from async_lru import alru_cache
 from enum import Enum
 import requests
 import re
@@ -21,8 +22,8 @@ containers = {
     "registry.k8s.io/kube-controller-manager": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/kube-scheduler": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/pause": [SpecialVersion.PAUSE_VERSION],
-    "quay.io/cilium/cilium": ["v1.18.2"],
-    "quay.io/cilium/operator-generic": ["v1.18.2"],
+    "quay.io/cilium/cilium": [SpecialVersion.CILIUM_VERSION],
+    "quay.io/cilium/operator-generic": [SpecialVersion.CILIUM_VERSION],
     "registry.k8s.io/coredns/coredns": [
         SpecialVersion.COREDNS_VERSION,
         SpecialVersion.CILIUM_GREP
@@ -38,61 +39,134 @@ containers = {
 
 sem: asyncio.Semaphore | NoopSemaphore = NoopSemaphore()
 
-async def prefetch_kubernetes_version(tmpdir: str, release: Release):
-    async with sem:
-        print(f"fetching {release.latest.name}")
+async def run_command(command: list[str], tmpdir: str) -> tuple[str, str]:
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout = asyncio.subprocess.PIPE,
+        stderr = asyncio.subprocess.PIPE,
+        env = os.environ | { "TMPDIR": tmpdir }
+    )
 
-        process = await asyncio.create_subprocess_exec(
-            "nix", "store", "prefetch-file",
-            "--hash-type", "sha256",
-            "--json",
-            "--unpack",
-            f"https://github.com/kubernetes/kubernetes/archive/refs/tags/v{release.latest.name}.tar.gz",
-            stdout = asyncio.subprocess.PIPE,
-            stderr = asyncio.subprocess.PIPE,
-            env = os.environ | { "TMPDIR": tmpdir }
+    stdout, stderr = await process.communicate()
+
+    if process.returncode != 0:
+        raise ProcessFailed(
+            exit_code = process.returncode,
+            stdout = stdout.decode('utf-8'),
+            stderr = stderr.decode('utf-8'),
+            command = command
         )
-        stdout, stderr = await process.communicate()
 
-    if process.returncode == 0:
-        output = NixStorePrefetchFileOutput.model_validate_json(stdout)
+    return (stdout, stderr)
 
-        print(f"fetched {release.latest.name} with hash {output.hash}")
-
-        return {
-            release.name: release.latest.name,
-            release.latest.name: Source(
-                version = release.latest.name,
-                hash = output.hash,
-                is_maintained = release.isMaintained,
-                containers = {}
+@alru_cache(maxsize=512)
+async def get_cilium_image_version(tmpdir: str) -> str:
+    try:
+        async with sem:
+            cilium_path, stderr = await run_command(
+                command = [
+                    "nix", "build", "--impure",
+                    "--print-out-paths",
+                    "--expr", f'''
+                    let
+                      flake = builtins.getFlake "git+file://{Path.cwd()}";
+                    in
+                      flake.legacyPackages.${{builtins.currentSystem}}.cilium-cli
+                    '''
+                ],
+                tmpdir = tmpdir
             )
-        }
 
+
+        async with sem:
+            cilium_version, stderr = await run_command(
+                command = [
+                    cilium_path.strip().decode('utf-8') + "/bin/cilium", "version", "--client"
+                ],
+                tmpdir = tmpdir
+            )
+
+    except ProcessFailed as exception:
+        raise CouldNotResolveImageVersion(
+            kubernetes_version = kubernetes_version,
+            image = image,
+            exception = exception
+        )
+
+    cilium_version = cilium_version.strip().decode('utf-8')
+
+    match = re.search(f'(?<=cilium image \\(default\\): v)(.+)', cilium_version)
+
+    if match:
+        return match.group(0)
+    else:
+        raise CouldNotResolveImageVersion(kubernetes_version = kubernetes_version, image = image)
+
+async def prefetch_kubernetes_version(tmpdir: str, release: Release):
+    try:
+        async with sem:
+            print(f"fetching {release.latest.name}")
+
+            stdout, stderr = await run_command(
+                command = [
+                    "nix", "store", "prefetch-file",
+                    "--hash-type", "sha256",
+                    "--json",
+                    "--unpack",
+                    f"https://github.com/kubernetes/kubernetes/archive/refs/tags/v{release.latest.name}.tar.gz",
+                ],
+                tmpdir = tmpdir
+            )
+    except ProcessFailed as exception:
+        raise CouldNotResolveImageVersion(
+            kubernetes_version = kubernetes_version,
+            image = image,
+            exception = exception
+        )
+
+
+    output = NixStorePrefetchFileOutput.model_validate_json(stdout)
+
+    print(f"fetched {release.latest.name} with hash {output.hash}")
+
+    return {
+        release.name: release.latest.name,
+        release.latest.name: Source(
+            version = release.latest.name,
+            hash = output.hash,
+            is_maintained = release.isMaintained,
+            containers = {},
+            cilium_image_version = await get_cilium_image_version(tmpdir)
+        )
+    }
+
+@alru_cache(maxsize=512)
 async def resolve_special_version(tmpdir: str, kubernetes_version: str, image: str, image_version: SpecialVersion):
     if image_version == SpecialVersion.KUBERNETES:
         return f"v{kubernetes_version}"
 
     if image_version == SpecialVersion.CILIUM_GREP:
-        async with sem:
-            process = await asyncio.create_subprocess_exec(
-                "nix", "build", "--impure",
-                "--print-out-paths",
-                "--expr", f'''
-                  let
-                    flake = builtins.getFlake "git+file://{Path.cwd()}";
-                  in
-                    flake.legacyPackages.${{builtins.currentSystem}}.cilium-cli.src
-                ''',
-                stdout = asyncio.subprocess.PIPE,
-                stderr = asyncio.subprocess.PIPE,
-                env = os.environ | { "TMPDIR": tmpdir }
+        try:
+            async with sem:
+                cilium_src, stderr = await run_command(
+                    command = [
+                        "nix", "build", "--impure",
+                        "--print-out-paths",
+                        "--expr", f'''
+                          let
+                            flake = builtins.getFlake "git+file://{Path.cwd()}";
+                          in
+                            flake.legacyPackages.${{builtins.currentSystem}}.cilium-cli.src
+                        '''
+                    ],
+                    tmpdir = tmpdir
+                )
+        except ProcessFailed as exception:
+            raise CouldNotResolveImageVersion(
+                kubernetes_version = kubernetes_version,
+                image = image,
+                exception = exception
             )
-
-            cilium_src, stderr = await process.communicate()
-
-        if process.returncode != 0:
-            raise CouldNotResolveImageVersion(kubernetes_version = kubernetes_version, image = image, stderr = stderr.decode('utf-8'))
 
         with open(cilium_src.strip() + b"/vendor/github.com/cilium/cilium/cilium-cli/defaults/defaults.go", "r") as defaults_file:
             defaults = defaults_file.read()
@@ -103,26 +177,30 @@ async def resolve_special_version(tmpdir: str, kubernetes_version: str, image: s
                 return match.group(0)
             else:
                 raise CouldNotResolveImageVersion(kubernetes_version = kubernetes_version, image = image)
+    if image_version == SpecialVersion.CILIUM_VERSION:
+        return "v" + await get_cilium_image_version(tmpdir)
     else:
-        async with sem:
-          process = await asyncio.create_subprocess_exec(
-              "nix", "build", "--impure",
-              "--print-out-paths",
-              "--expr", f'''
-                let
-                  flake = builtins.getFlake "git+file://{Path.cwd()}";
-                in
-                  flake.legacyPackages.${{builtins.currentSystem}}.kubernetes."{kubernetes_version.replace('.', '_')}".src
-              ''',
-              stdout = asyncio.subprocess.PIPE,
-              stderr = asyncio.subprocess.PIPE,
-              env = os.environ | { "TMPDIR": tmpdir }
-          )
-
-          kubernetes_src, stderr = await process.communicate()
-
-        if process.returncode != 0:
-            raise CouldNotResolveImageVersion(kubernetes_version = kubernetes_version, image = image, stderr = stderr.decode('utf-8'))
+        try:
+            async with sem:
+                kubernetes_src, stderr = await run_command(
+                    command = [
+                        "nix", "build", "--impure",
+                        "--print-out-paths",
+                        "--expr", f'''
+                          let
+                            flake = builtins.getFlake "git+file://{Path.cwd()}";
+                          in
+                            flake.legacyPackages.${{builtins.currentSystem}}.kubernetes."{kubernetes_version.replace('.', '_')}".src
+                        '''
+                    ],
+                    tmpdir = tmpdir
+                )
+        except ProcessFailed as exception:
+            raise CouldNotResolveImageVersion(
+                kubernetes_version = kubernetes_version,
+                image = image,
+                exception = exception
+            )
 
         pattern: str
         ensure_v_prefix: bool = False

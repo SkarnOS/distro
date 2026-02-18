@@ -23,6 +23,10 @@
                 containers = lib.mkOption {
                   type = lib.types.attrsOf (lib.types.listOf lib.types.str);
                 };
+
+                cilium_image_version = lib.mkOption {
+                  type = lib.types.str;
+                };
               };
             }
           );
@@ -65,10 +69,16 @@
               hash,
               is_maintained,
               containers,
+              cilium_image_version,
             }:
             lib.nameValuePair (lib.replaceString "." "_" name) (
               pkgs.callPackage ./kubernetes.nix {
-                inherit version hash is_maintained;
+                inherit
+                  version
+                  hash
+                  is_maintained
+                  cilium_image_version
+                  ;
                 containers = lib.mapAttrs (
                   name: tags: lib.map (tag: config.legacyPackages.ociImages.${name}.${tag}) tags
                 ) containers;

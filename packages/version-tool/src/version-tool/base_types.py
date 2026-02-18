@@ -57,12 +57,14 @@ class SpecialVersion(Enum):
     DEFAULT_ETCD_VERSION = 3
     PAUSE_VERSION = 4
     CILIUM_GREP = 5
+    CILIUM_VERSION = 6
 
 class Source(BaseModel):
     version: str
     hash: str
     is_maintained: bool
     containers: dict[str, list[str | SpecialVersion]]
+    cilium_image_version: str
 
 class NixStorePrefetchFileOutput(BaseModel):
     hash: str
@@ -92,11 +94,39 @@ class SkopeoImageInfo(BaseModel):
 class CouldNotResolveImageVersion(Exception):
     kubernetes_version: str
     image: str
-    stderr: str | None
+    exception: Exception | None
 
-    def __init__(self, kubernetes_version: str, image: str, stderr: str | None = None):
-        super().__init__(f"Could not resolve version of image {image} for Kubernetes {kubernetes_version}: \n{stderr}")
+    def __init__(self, kubernetes_version: str, image: str, exception: Exception | None = None):
+        super().__init__(
+            f"Could not resolve version of image {image} for Kubernetes {kubernetes_version}"
+            + (("\n" + str(exception)) if exception is not None else "")
+        )
 
         self.kubernetes_version = kubernetes_version
         self.image = image
+        self.exception = exception
+
+class ProcessFailed(Exception):
+    command: list[str]
+    exit_code: int
+    stdout: str
+    stderr: str
+
+    @classmethod
+    def indent(cls, string: str) -> str:
+        return "\n".join(map(lambda line: "    " + line, string.split("\n")))
+
+    def __init__(self, command: list[str], exit_code: int, stdout: str, stderr: str):
+        super().__init__("\n".join([
+            f"Command exited with {exit_code}",
+            "$ " + " ".join(command),
+            "stdout: ",
+            ProcessFailed.indent(stdout),
+            "stderr: ",
+            ProcessFailed.indent(stderr)
+        ]))
+
+        self.exit_code = exit_code
+        self.stdout = stdout
         self.stderr = stderr
+        self.command = command

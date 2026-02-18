@@ -48,7 +48,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.34": "1.34.4",
     "1.34.4": {
@@ -99,7 +100,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.33": "1.33.8",
     "1.33.8": {
@@ -150,7 +152,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.32": "1.32.12",
     "1.32.12": {
@@ -201,7 +204,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.31": "1.31.14",
     "1.31.14": {
@@ -252,7 +256,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.30": "1.30.14",
     "1.30.14": {
@@ -303,7 +308,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.29": "1.29.15",
     "1.29.15": {
@@ -354,7 +360,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.28": "1.28.15",
     "1.28.15": {
@@ -405,7 +412,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.27": "1.27.16",
     "1.27.16": {
@@ -456,7 +464,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.26": "1.26.15",
     "1.26.15": {
@@ -507,7 +516,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.25": "1.25.16",
     "1.25.16": {
@@ -558,7 +568,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.24": "1.24.17",
     "1.24.17": {
@@ -609,7 +620,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.23": "1.23.17",
     "1.23.17": {
@@ -660,7 +672,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.22": "1.22.17",
     "1.22.17": {
@@ -711,7 +724,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.21": "1.21.14",
     "1.21.14": {
@@ -762,7 +776,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.20": "1.20.15",
     "1.20.15": {
@@ -813,7 +828,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.19": "1.19.16",
     "1.19.16": {
@@ -864,7 +880,8 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     },
     "1.18": "1.18.20",
     "1.18.20": {
@@ -915,6 +932,7 @@
             "docker.io/alpine/socat": [
                 "1.8.0.3"
             ]
-        }
+        },
+        "cilium_image_version": "1.18.2"
     }
 }

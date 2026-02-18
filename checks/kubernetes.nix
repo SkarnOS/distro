@@ -3,6 +3,7 @@
   dockerTools,
   cilium-cli,
   containerd,
+  parallel,
   lib,
   writers,
 
@@ -35,6 +36,12 @@ let
     "authentication.mutual.spire.install.server.image.useDigest" = "false";
     "standaloneDnsProxy.image.useDigest" = "false";
   };
+
+  containerImages = writers.writeText "container-images" (
+    lib.concatMapStringsSep "\n" ({ name, value }: lib.concatStringsSep "\n" value) (
+      lib.mapAttrsToList lib.nameValuePair kubernetes.passthru.containers
+    )
+  );
 in
 testers.nixosTest {
   name = "nix-kubernetes";
@@ -50,7 +57,7 @@ testers.nixosTest {
       networking.useNetworkd = true;
 
       virtualisation = {
-        cores = 2;
+        cores = 4;
         memorySize = 4096;
         diskSize = 1024 * 20;
         # restrictNetwork = true;
@@ -96,12 +103,7 @@ testers.nixosTest {
       return "NotReady" in nodes
 
     machine.wait_for_unit("multi-user.target")
-    ${lib.concatMapStringsSep "\n" (
-      { name, value }:
-      lib.concatMapStringsSep "\n" (value: ''
-        machine.succeed("${lib.getExe' containerd "ctr"} -n k8s.io image import ${value}")
-      '') value
-    ) (lib.mapAttrsToList lib.nameValuePair kubernetes.passthru.containers)}
+    machine.succeed("${lib.getExe parallel} -- ${lib.getExe' containerd "ctr"} -n k8s.io image import < ${containerImages}")
 
     cilium_params: list[str] = reduce(
       operator.add,
@@ -122,7 +124,7 @@ testers.nixosTest {
     machine.succeed(" ".join([
       "cilium",
       "install",
-      "--version", "1.18.2",
+      "--version", "${kubernetes.passthru.cilium_image_version}",
       *cilium_params
     ]))
 
