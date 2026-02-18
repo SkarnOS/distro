@@ -46,10 +46,6 @@ testers.nixosTest {
         inputs.self.nixosModules."kubernetes"
       ];
 
-      environment.systemPackages = [
-        cilium-cli
-      ];
-
       systemd.network.enable = true;
       networking.useNetworkd = true;
 

@@ -74,6 +74,7 @@ in
 
     environment.systemPackages = [
       pkgs.bpftools
+      cfg.package
     ];
 
     services.kubernetes.kubelet.nodeIp = lib.mkIf (
