@@ -92,8 +92,8 @@ async def sync_image_versions():
         if not os.path.exists(tmpdir):
             os.mkdir(tmpdir)
 
-        with open("packages/sources.json", "rb") as images_file:
-            sources = TypeAdapter(Sources).validate_json(images_file.read())
+        with open("packages/sources.json", "rb") as sources_file:
+            sources = TypeAdapter(Sources).validate_json(sources_file.read())
 
         images: Images = {}
 
@@ -101,9 +101,10 @@ async def sync_image_versions():
             if isinstance(value, str):
                 continue
 
-            for image_name, image_version in value.containers.items():
-                images.setdefault(image_name, {})
-                images[image_name] |= { image_version: ImageSpec(hash = None, digest = None) }
+            for image_name, image_versions in value.containers.items():
+                for image_version in image_versions:
+                    images.setdefault(image_name, {})
+                    images[image_name] |= { image_version: ImageSpec(hash = None, digest = None) }
 
         print(print_image_identifiers(images))
 

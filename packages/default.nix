@@ -55,6 +55,8 @@
           if lib.isString version then config.rename-me.kubernetes.versions.${version} else version
         ) (lib.importJSON ./sources.json);
 
+        legacyPackages.cilium-cli = pkgs.callPackage ./cilium-cli.nix { };
+
         legacyPackages.kubernetes = lib.pipe config.rename-me.kubernetes.versions [
           (lib.mapAttrs' (
             name:

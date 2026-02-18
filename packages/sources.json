@@ -5,14 +5,49 @@
         "hash": "sha256-Y5ixQgAdtMBUs/nfPOOdu4pp9uOh/Cr57HO/Owf7PwI=",
         "is_maintained": true,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.35.1",
-            "registry.k8s.io/kube-controller-manager": "v1.35.1",
-            "registry.k8s.io/kube-scheduler": "v1.35.1",
-            "registry.k8s.io/pause": "3.10.1",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.13.1",
-            "registry.k8s.io/etcd": "3.6.6-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.35.1"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.35.1"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.35.1"
+            ],
+            "registry.k8s.io/pause": [
+                "3.10.1"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.13.1",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.6.6-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.34": "1.34.4",
@@ -21,14 +56,49 @@
         "hash": "sha256-kw992zj4VrpsuGgBtGD92ok3QoNcl4K42rOJVv+9BJc=",
         "is_maintained": true,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.34.4",
-            "registry.k8s.io/kube-controller-manager": "v1.34.4",
-            "registry.k8s.io/kube-scheduler": "v1.34.4",
-            "registry.k8s.io/pause": "3.10.1",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.12.1",
-            "registry.k8s.io/etcd": "3.6.5-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.34.4"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.34.4"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.34.4"
+            ],
+            "registry.k8s.io/pause": [
+                "3.10.1"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.12.1",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.6.5-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.33": "1.33.8",
@@ -37,14 +107,49 @@
         "hash": "sha256-Ghx3bg7xHqj5Vb+wZZH28VQtvd+ThqQ+Tg7/GdQTJJg=",
         "is_maintained": true,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.33.8",
-            "registry.k8s.io/kube-controller-manager": "v1.33.8",
-            "registry.k8s.io/kube-scheduler": "v1.33.8",
-            "registry.k8s.io/pause": "3.10",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.12.0",
-            "registry.k8s.io/etcd": "3.5.24-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.33.8"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.33.8"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.33.8"
+            ],
+            "registry.k8s.io/pause": [
+                "3.10"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.12.0",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.24-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.32": "1.32.12",
@@ -53,14 +158,49 @@
         "hash": "sha256-aaFSdGJmcJqkgmu5myg7b3Gq0vVIYXUIm4kC+TPLi38=",
         "is_maintained": true,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.32.12",
-            "registry.k8s.io/kube-controller-manager": "v1.32.12",
-            "registry.k8s.io/kube-scheduler": "v1.32.12",
-            "registry.k8s.io/pause": "3.10",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.11.3",
-            "registry.k8s.io/etcd": "3.5.24-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.32.12"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.32.12"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.32.12"
+            ],
+            "registry.k8s.io/pause": [
+                "3.10"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.11.3",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.24-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.31": "1.31.14",
@@ -69,14 +209,49 @@
         "hash": "sha256-rfYv9VlXKdQNcR1AiMv7wVeyJYHq5qJPw9g15sn3U40=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.31.14",
-            "registry.k8s.io/kube-controller-manager": "v1.31.14",
-            "registry.k8s.io/kube-scheduler": "v1.31.14",
-            "registry.k8s.io/pause": "3.10",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.11.3",
-            "registry.k8s.io/etcd": "3.5.24-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.31.14"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.31.14"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.31.14"
+            ],
+            "registry.k8s.io/pause": [
+                "3.10"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.11.3",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.24-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.30": "1.30.14",
@@ -85,14 +260,49 @@
         "hash": "sha256-Jljy9wkAZlJ/WhIQ/9tBFjNYdrmV90dsoijg6Xrgv7I=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.30.14",
-            "registry.k8s.io/kube-controller-manager": "v1.30.14",
-            "registry.k8s.io/kube-scheduler": "v1.30.14",
-            "registry.k8s.io/pause": "3.9",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.11.3",
-            "registry.k8s.io/etcd": "3.5.15-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.30.14"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.30.14"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.30.14"
+            ],
+            "registry.k8s.io/pause": [
+                "3.9"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.11.3",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.15-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.29": "1.29.15",
@@ -101,14 +311,49 @@
         "hash": "sha256-mUgXSiXNgD5uSQJSsJxG8UzUcyMe4ZKtijOz6/UKiPk=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.29.15",
-            "registry.k8s.io/kube-controller-manager": "v1.29.15",
-            "registry.k8s.io/kube-scheduler": "v1.29.15",
-            "registry.k8s.io/pause": "3.9",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.11.1",
-            "registry.k8s.io/etcd": "3.5.16-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.29.15"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.29.15"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.29.15"
+            ],
+            "registry.k8s.io/pause": [
+                "3.9"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.11.1",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.16-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.28": "1.28.15",
@@ -117,14 +362,49 @@
         "hash": "sha256-E9NO9L1pV5Whn/H3/Kst4u+7B9Qx63A9bGRBrE21nDE=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.28.15",
-            "registry.k8s.io/kube-controller-manager": "v1.28.15",
-            "registry.k8s.io/kube-scheduler": "v1.28.15",
-            "registry.k8s.io/pause": "3.9",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.10.1",
-            "registry.k8s.io/etcd": "3.5.15-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.28.15"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.28.15"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.28.15"
+            ],
+            "registry.k8s.io/pause": [
+                "3.9"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.10.1",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.15-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.27": "1.27.16",
@@ -133,14 +413,49 @@
         "hash": "sha256-ksMqlJwc8dNj8kF8U2jKM7/U9Yyq9aGFks9/D9tOz2c=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.27.16",
-            "registry.k8s.io/kube-controller-manager": "v1.27.16",
-            "registry.k8s.io/kube-scheduler": "v1.27.16",
-            "registry.k8s.io/pause": "3.9",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.10.1",
-            "registry.k8s.io/etcd": "3.5.12-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.27.16"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.27.16"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.27.16"
+            ],
+            "registry.k8s.io/pause": [
+                "3.9"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.10.1",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.12-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.26": "1.26.15",
@@ -149,14 +464,49 @@
         "hash": "sha256-zegGiZM3nCxbYzwtTTgbzphAerdigSyxESpmmK3HSgI=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.26.15",
-            "registry.k8s.io/kube-controller-manager": "v1.26.15",
-            "registry.k8s.io/kube-scheduler": "v1.26.15",
-            "registry.k8s.io/pause": "3.9",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.9.3",
-            "registry.k8s.io/etcd": "3.5.10-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.26.15"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.26.15"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.26.15"
+            ],
+            "registry.k8s.io/pause": [
+                "3.9"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.9.3",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.10-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.25": "1.25.16",
@@ -165,14 +515,49 @@
         "hash": "sha256-Je+PeMF7Ivg5gD/y8l0piXfO60/TClz28lyvyyCnXkA=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.25.16",
-            "registry.k8s.io/kube-controller-manager": "v1.25.16",
-            "registry.k8s.io/kube-scheduler": "v1.25.16",
-            "registry.k8s.io/pause": "3.8",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.9.3",
-            "registry.k8s.io/etcd": "3.5.9-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.25.16"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.25.16"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.25.16"
+            ],
+            "registry.k8s.io/pause": [
+                "3.8"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.9.3",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.9-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.24": "1.24.17",
@@ -181,14 +566,49 @@
         "hash": "sha256-js0NhYL5WCvlufEyYUvk9xVlbU7minpinn7w/QY+CnA=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.24.17",
-            "registry.k8s.io/kube-controller-manager": "v1.24.17",
-            "registry.k8s.io/kube-scheduler": "v1.24.17",
-            "registry.k8s.io/pause": "3.7",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.8.6",
-            "registry.k8s.io/etcd": "3.5.6-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.24.17"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.24.17"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.24.17"
+            ],
+            "registry.k8s.io/pause": [
+                "3.7"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.8.6",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.6-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.23": "1.23.17",
@@ -197,14 +617,49 @@
         "hash": "sha256-H1HuA+eJzYNRIxscJpimH/AKFJM/ijOd8yrN9E/PZQ8=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.23.17",
-            "registry.k8s.io/kube-controller-manager": "v1.23.17",
-            "registry.k8s.io/kube-scheduler": "v1.23.17",
-            "registry.k8s.io/pause": "3.6",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.8.6",
-            "registry.k8s.io/etcd": "3.5.6-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.23.17"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.23.17"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.23.17"
+            ],
+            "registry.k8s.io/pause": [
+                "3.6"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.8.6",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.6-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.22": "1.22.17",
@@ -213,14 +668,49 @@
         "hash": "sha256-T4DUleHYNWHtdIJAsdroBDiDuiQzOmySBhF+RVoC/38=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.22.17",
-            "registry.k8s.io/kube-controller-manager": "v1.22.17",
-            "registry.k8s.io/kube-scheduler": "v1.22.17",
-            "registry.k8s.io/pause": "3.5",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.8.4",
-            "registry.k8s.io/etcd": "3.5.6-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.22.17"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.22.17"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.22.17"
+            ],
+            "registry.k8s.io/pause": [
+                "3.5"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.8.4",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.5.6-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.21": "1.21.14",
@@ -229,14 +719,49 @@
         "hash": "sha256-6LxkLqQMmCncndd4RXLmN04su2IsBXQDWMB7NYoG4is=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.21.14",
-            "registry.k8s.io/kube-controller-manager": "v1.21.14",
-            "registry.k8s.io/kube-scheduler": "v1.21.14",
-            "registry.k8s.io/pause": "3.4.1",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.8.0",
-            "registry.k8s.io/etcd": "3.4.13-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.21.14"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.21.14"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.21.14"
+            ],
+            "registry.k8s.io/pause": [
+                "3.4.1"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.8.0",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.4.13-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.20": "1.20.15",
@@ -245,14 +770,49 @@
         "hash": "sha256-FVUfIXLQdJrqUP44zxPuZn9BG1jkZR1IeABY5wK+1f0=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.20.15",
-            "registry.k8s.io/kube-controller-manager": "v1.20.15",
-            "registry.k8s.io/kube-scheduler": "v1.20.15",
-            "registry.k8s.io/pause": "3.2",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.7.0",
-            "registry.k8s.io/etcd": "3.4.13-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.20.15"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.20.15"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.20.15"
+            ],
+            "registry.k8s.io/pause": [
+                "3.2"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.7.0",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.4.13-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.19": "1.19.16",
@@ -261,14 +821,49 @@
         "hash": "sha256-mrP526J29Pjna+TYM6SBMCwSMltm+irfYDec0zgZLrA=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.19.16",
-            "registry.k8s.io/kube-controller-manager": "v1.19.16",
-            "registry.k8s.io/kube-scheduler": "v1.19.16",
-            "registry.k8s.io/pause": "3.2",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.7.0",
-            "registry.k8s.io/etcd": "3.4.13-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.19.16"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.19.16"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.19.16"
+            ],
+            "registry.k8s.io/pause": [
+                "3.2"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.7.0",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.4.13-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     },
     "1.18": "1.18.20",
@@ -277,14 +872,49 @@
         "hash": "sha256-5tCnt37sFaTQPlO5SZZ0muftVSI6sZ29YVfCvlPF+V4=",
         "is_maintained": false,
         "containers": {
-            "registry.k8s.io/kube-apiserver": "v1.18.20",
-            "registry.k8s.io/kube-controller-manager": "v1.18.20",
-            "registry.k8s.io/kube-scheduler": "v1.18.20",
-            "registry.k8s.io/pause": "3.2",
-            "quay.io/cilium/cilium": "v1.18.2",
-            "quay.io/cilium/operator-generic": "v1.18.2",
-            "registry.k8s.io/coredns/coredns": "v1.6.7",
-            "registry.k8s.io/etcd": "3.4.3-0"
+            "registry.k8s.io/kube-apiserver": [
+                "v1.18.20"
+            ],
+            "registry.k8s.io/kube-controller-manager": [
+                "v1.18.20"
+            ],
+            "registry.k8s.io/kube-scheduler": [
+                "v1.18.20"
+            ],
+            "registry.k8s.io/pause": [
+                "3.2"
+            ],
+            "quay.io/cilium/cilium": [
+                "v1.18.2"
+            ],
+            "quay.io/cilium/operator-generic": [
+                "v1.18.2"
+            ],
+            "registry.k8s.io/coredns/coredns": [
+                "v1.6.7",
+                "v1.12.4"
+            ],
+            "registry.k8s.io/etcd": [
+                "3.4.3-0"
+            ],
+            "quay.io/cilium/network-perf": [
+                "1755027472-c3d489a"
+            ],
+            "quay.io/cilium/alpine-curl": [
+                "v1.10.0"
+            ],
+            "quay.io/cilium/test-connection-disruption": [
+                "v0.0.16"
+            ],
+            "quay.io/cilium/json-mock": [
+                "v1.3.9"
+            ],
+            "quay.io/frrouting/frr": [
+                "10.4.1"
+            ],
+            "docker.io/alpine/socat": [
+                "1.8.0.3"
+            ]
         }
     }
 }

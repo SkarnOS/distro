@@ -56,12 +56,13 @@ class SpecialVersion(Enum):
     COREDNS_VERSION = 2
     DEFAULT_ETCD_VERSION = 3
     PAUSE_VERSION = 4
+    CILIUM_GREP = 5
 
 class Source(BaseModel):
     version: str
     hash: str
     is_maintained: bool
-    containers: dict[str, str | SpecialVersion]
+    containers: dict[str, list[str | SpecialVersion]]
 
 class NixStorePrefetchFileOutput(BaseModel):
     hash: str
@@ -94,7 +95,7 @@ class CouldNotResolveImageVersion(Exception):
     stderr: str | None
 
     def __init__(self, kubernetes_version: str, image: str, stderr: str | None = None):
-        super().__init__(f"Could not resolve version of image {image} for Kubernetes {kubernetes_version} ")
+        super().__init__(f"Could not resolve version of image {image} for Kubernetes {kubernetes_version}: \n{stderr}")
 
         self.kubernetes_version = kubernetes_version
         self.image = image
