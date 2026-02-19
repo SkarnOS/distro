@@ -189,8 +189,7 @@ testers.nixosTest {
       "--external-ip", "10.0.2.15",
       "--external-ip", "10.0.2.15",
       "--curl-insecure",
-      "--debug", "--verbose",
-      "--test", "to-fqdns"
+      "--debug", "--verbose"
     ]))
   '';
 }
