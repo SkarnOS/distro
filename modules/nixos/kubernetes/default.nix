@@ -570,14 +570,14 @@ in
         addAction(SuffixMatchNodeRule(reverseSuffix), PoolAction("kubernetes"))
       '';
     };
-    networking = {
-      nameservers = [ "127.0.0.1" ];
-      search = lib.mkDefault [
-        "default.svc.cluster.local"
-        "svc.cluster.local"
-        "cluster.local"
-      ];
-    };
+    # networking = {
+    #   nameservers = [ "127.0.0.1" ];
+    #   search = lib.mkDefault [
+    #     "default.svc.cluster.local"
+    #     "svc.cluster.local"
+    #     "cluster.local"
+    #   ];
+    # };
 
     systemd = {
       tmpfiles.rules = [

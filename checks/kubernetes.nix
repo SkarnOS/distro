@@ -11,9 +11,11 @@
   inputs,
 }:
 let
+  localRouterIpv4 = "10.224.6.1";
+  ipv4NativeRoutingCIDR = "10.100.0.0/16";
   ciliumParams = {
     "bpf.masquerade" = "true";
-    "ipv6.enabled" = "true";
+    # "ipv6.enabled" = "true"; # no need for now
     "ipam.mode" = "kubernetes";
     "bpf.lbExternalClusterIP" = "true";
     "envoy.enabled" = "false";
@@ -35,6 +37,11 @@ let
     "authentication.mutual.spire.install.agent.image.useDigest" = "false";
     "authentication.mutual.spire.install.server.image.useDigest" = "false";
     "standaloneDnsProxy.image.useDigest" = "false";
+    # added so i can hardcode the address
+    "extraArgs[0]" = "--local-router-ipv4=${localRouterIpv4}";
+    "routingMode" = "native";
+    "endpointRoutes.enabled" = "true";
+    inherit ipv4NativeRoutingCIDR;
   };
 
   containerImages = writers.writeText "container-images" (
@@ -60,13 +67,53 @@ testers.nixosTest {
         cores = 4;
         memorySize = 4096;
         diskSize = 1024 * 20;
-        # restrictNetwork = true;
+        restrictNetwork = true;
+      };
+
+      systemd.services.nginx-certs = {
+        before = [ "nginx.service" ];
+        requiredBy = [ "nginx.service" ];
+
+        path = [
+          pkgs.openssl
+        ];
+
+        script = ''
+          mkdir -p /var/lib/nginx
+          openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 365 -nodes \
+            -keyout /var/lib/nginx/cert.key -out /var/lib/nginx/cert.crt \
+            -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,DNS:one.one.one.one,DNS:k8s.io"
+          chown nginx:nginx /var/lib/nginx/{cert.crt,cert.key}
+        '';
+      };
+
+      services.nginx = {
+        enable = true;
+
+        virtualHosts."k8s.io" = {
+          addSSL = true;
+          sslCertificate = "/var/lib/nginx/cert.crt";
+          sslCertificateKey = "/var/lib/nginx/cert.key";
+        };
+
+        virtualHosts."one.one.one.one" = {
+          addSSL = true;
+          sslCertificate = "/var/lib/nginx/cert.crt";
+          sslCertificateKey = "/var/lib/nginx/cert.key";
+        };
+      };
+
+      networking.hosts = {
+        ${localRouterIpv4} = [
+          "one.one.one.one"
+          "k8s.io"
+        ];
       };
 
       services.kubernetes.package = kubernetes;
 
       services.resolved.settings.Resolve = {
-        DNSStubListenerExtra = "10.224.6.236";
+        DNSStubListenerExtra = localRouterIpv4;
       };
 
       networking.firewall.enable = false;
@@ -76,7 +123,7 @@ testers.nixosTest {
         network = {
           cni."cilium" = { };
           ingress.interface = "eth0";
-          nameservers = [ "10.224.6.236" ];
+          nameservers = [ localRouterIpv4 ];
         };
         clusterName = "test-cluster";
       };
@@ -103,6 +150,8 @@ testers.nixosTest {
       return "NotReady" in nodes
 
     machine.wait_for_unit("multi-user.target")
+    machine.wait_for_unit("nginx.service")
+
     machine.succeed("${lib.getExe parallel} -- ${lib.getExe' containerd "ctr"} -n k8s.io image import < ${containerImages}")
 
     cilium_params: list[str] = reduce(
@@ -129,8 +178,19 @@ testers.nixosTest {
     ]))
 
     print(machine.succeed("cilium status --wait"))
-    print(machine.succeed("cilium connectivity test"))
 
+    print(machine.succeed("ss -tlnp"))
+    print(machine.succeed("systemctl restart nginx"))
+    print(machine.succeed("ss -tlnp"))
 
+    machine.succeed(" ".join([
+      "cilium connectivity test",
+      "--single-node",
+      "--external-ip", "10.0.2.15",
+      "--external-ip", "10.0.2.15",
+      "--curl-insecure",
+      "--debug", "--verbose",
+      "--test", "to-fqdns"
+    ]))
   '';
 }
