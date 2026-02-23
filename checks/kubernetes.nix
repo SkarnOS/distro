@@ -25,8 +25,10 @@ let
     "image.useDigest" = "false";
     "certgen.useDigest" = "false";
     "hubble.relay.image.useDigest" = "false";
-    "hubble.ui.backend.useDigest" = "false";
-    "hubble.ui.frontend.useDigest" = "false";
+    "hubble.ui.enabled" = "true";
+    "hubble.relay.enabled" = "true";
+    "hubble.ui.backend.image.useDigest" = "false";
+    "hubble.ui.frontend.image.useDigest" = "false";
     "envoy.image.useDigest" = "false";
     "operator.image.useDigest" = "false";
     "nodeinit.image.useDigest" = "false";

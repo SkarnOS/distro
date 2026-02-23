@@ -24,6 +24,9 @@ containers = {
     "registry.k8s.io/pause": [SpecialVersion.PAUSE_VERSION],
     "quay.io/cilium/cilium": [SpecialVersion.CILIUM_VERSION],
     "quay.io/cilium/operator-generic": [SpecialVersion.CILIUM_VERSION],
+    "quay.io/cilium/hubble-relay": [SpecialVersion.CILIUM_VERSION],
+    "quay.io/cilium/hubble-ui-backend": ["v0.13.3"],
+    "quay.io/cilium/hubble-ui": ["v0.13.3"],
     "registry.k8s.io/coredns/coredns": [
         SpecialVersion.COREDNS_VERSION,
         SpecialVersion.CILIUM_GREP
