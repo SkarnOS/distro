@@ -337,7 +337,7 @@ in
           kubernetesVersion: ${config.services.kubernetes.package.version}
           controlPlaneEndpoint: "127.0.0.1:${if cfg.haapi.enable then "6444" else "6443"}"
           networking:
-            dnsDomain: ${cfg.clusterName}.k8s.helsinki.tools
+            # dnsDomain: ${cfg.clusterName}.k8s.helsinki.tools
             podSubnet: 10.224.0.0/11,fd08:4e1:1::/52
             serviceSubnet: 10.96.0.0/12,fd08:4e1:2::/108
           controllerManager:
