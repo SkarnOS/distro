@@ -51,87 +51,131 @@ let
       lib.mapAttrsToList lib.nameValuePair kubernetes.passthru.containers
     )
   );
+
+  sshBackdoor = {
+    users.users.root.hashedPassword = "";
+    services.openssh.settings.PermitRootLogin = "yes";
+    services.openssh.settings.PermitEmptyPasswords = "yes";
+    security.pam.services.sshd.allowNullPassword = true;
+  };
 in
 testers.nixosTest {
   name = "nix-kubernetes";
 
-  nodes.machine =
-    { pkgs, ... }:
-    {
-      imports = [
-        inputs.self.nixosModules."kubernetes"
-      ];
-
-      systemd.network.enable = true;
-      networking.useNetworkd = true;
-
-      virtualisation = {
-        cores = 4;
-        memorySize = 4096;
-        diskSize = 1024 * 20;
-        restrictNetwork = true;
-      };
-
-      systemd.services.nginx-certs = {
-        before = [ "nginx.service" ];
-        requiredBy = [ "nginx.service" ];
-
-        path = [
-          pkgs.openssl
+  nodes = {
+    httpServer =
+      { pkgs, ... }:
+      {
+        imports = [
+          sshBackdoor
         ];
 
-        script = ''
-          mkdir -p /var/lib/nginx
-          openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 365 -nodes \
-            -keyout /var/lib/nginx/cert.key -out /var/lib/nginx/cert.crt \
-            -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,DNS:one.one.one.one,DNS:k8s.io"
-          chown nginx:nginx /var/lib/nginx/{cert.crt,cert.key}
-        '';
-      };
+        systemd.network.enable = true;
+        networking.useNetworkd = true;
 
-      services.nginx = {
-        enable = true;
+        networking.firewall.enable = false;
 
-        virtualHosts."k8s.io" = {
-          addSSL = true;
-          sslCertificate = "/var/lib/nginx/cert.crt";
-          sslCertificateKey = "/var/lib/nginx/cert.key";
+        systemd.services.nginx-certs = {
+          before = [ "nginx.service" ];
+          requiredBy = [ "nginx.service" ];
+
+          path = [
+            pkgs.openssl
+          ];
+
+          script = ''
+            mkdir -p /var/lib/nginx
+            openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 365 -nodes \
+              -keyout /var/lib/nginx/cert.key -out /var/lib/nginx/cert.crt \
+              -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,DNS:one.one.one.one,DNS:k8s.io"
+            chown nginx:nginx /var/lib/nginx/{cert.crt,cert.key}
+          '';
         };
 
-        virtualHosts."one.one.one.one" = {
-          addSSL = true;
-          sslCertificate = "/var/lib/nginx/cert.crt";
-          sslCertificateKey = "/var/lib/nginx/cert.key";
+        services.nginx = {
+          enable = true;
+
+          virtualHosts."k8s.io" = {
+            addSSL = true;
+            sslCertificate = "/var/lib/nginx/cert.crt";
+            sslCertificateKey = "/var/lib/nginx/cert.key";
+          };
+
+          virtualHosts."one.one.one.one" = {
+            addSSL = true;
+            sslCertificate = "/var/lib/nginx/cert.crt";
+            sslCertificateKey = "/var/lib/nginx/cert.key";
+          };
         };
       };
-
-      networking.hosts = {
-        ${localRouterIpv4} = [
-          "one.one.one.one"
-          "k8s.io"
+    machine =
+      { pkgs, nodes, ... }:
+      {
+        imports = [
+          inputs.self.nixosModules."kubernetes"
+          sshBackdoor
         ];
-      };
 
-      services.kubernetes.package = kubernetes;
+        systemd.network.enable = true;
+        networking.useNetworkd = true;
 
-      services.resolved.settings.Resolve = {
-        DNSStubListenerExtra = localRouterIpv4;
-      };
-
-      networking.firewall.enable = false;
-
-      rename-me.kubernetes = {
-        enable = true;
-        network = {
-          cni."cilium" = { };
-          ingress.interface = "eth0";
-          nameservers = [ localRouterIpv4 ];
+        virtualisation = {
+          cores = 4;
+          memorySize = 4096;
+          diskSize = 1024 * 20;
+          restrictNetwork = true;
+          forwardPorts = [
+            {
+              from = "host";
+              host.port = 2222;
+              guest.port = 22;
+            }
+            {
+              from = "host";
+              host.port = 4245;
+              guest.port = 4245;
+            }
+          ];
         };
-        clusterName = "test-cluster";
-      };
 
-      system.stateVersion = "25.11";
-    };
+        networking.hosts = {
+          "${nodes.httpServer.networking.primaryIPAddress}" = [
+            "one.one.one.one"
+            "k8s.io"
+          ];
+        };
+
+        services.resolved.settings.Resolve = {
+          DNS = "";
+          FallbackDNS = "";
+        };
+
+        services.kubernetes.package = kubernetes;
+
+        services.resolved.settings.Resolve = {
+          DNSStubListenerExtra = localRouterIpv4;
+        };
+
+        networking.firewall.enable = false;
+
+        rename-me.kubernetes = {
+          enable = true;
+          network = {
+            cni."cilium" = { };
+            ingress.interface = "eth0";
+            nameservers = [ localRouterIpv4 ];
+          };
+          clusterName = "test-cluster";
+        };
+
+        services.openssh = {
+          enable = true;
+          permitRootLogin = "yes";
+        };
+
+        system.stateVersion = "25.11";
+      };
+  };
 
   testScript = ''
     import json
@@ -152,7 +196,7 @@ testers.nixosTest {
       return "NotReady" in nodes
 
     machine.wait_for_unit("multi-user.target")
-    machine.wait_for_unit("nginx.service")
+    httpServer.wait_for_unit("nginx.service")
 
     machine.succeed("${lib.getExe parallel} -- ${lib.getExe' containerd "ctr"} -n k8s.io image import < ${containerImages}")
 
@@ -179,11 +223,9 @@ testers.nixosTest {
       *cilium_params
     ]))
 
-    print(machine.succeed("cilium status --wait"))
+    machine.succeed("cilium status --wait")
+    machine.succeed("cilium hubble enable --ui")
 
-    print(machine.succeed("ss -tlnp"))
-    print(machine.succeed("systemctl restart nginx"))
-    print(machine.succeed("ss -tlnp"))
 
     machine.succeed(" ".join([
       "cilium connectivity test",
