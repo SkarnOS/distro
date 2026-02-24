@@ -260,21 +260,21 @@
         }
     },
     "quay.io/cilium/cilium": {
-        "v1.18.2": {
-            "hash": "sha256-ceTrgHYFk0nAhGRdZEkmEPgbTx8gO4DG6X+OySNbDC4=",
-            "digest": "sha256:858f807ea4e20e85e3ea3240a762e1f4b29f1cb5bbd0463b8aa77e7b097c0667"
+        "v1.19.0": {
+            "hash": "sha256-9GTUSEMU8hY5WzmB2b4xw1jXtMl5z+YCrtOHyJ47nNk=",
+            "digest": "sha256:be9f8571c2e114b3e12e41f785f2356ade703b2eac936aa878805565f0468c60"
         }
     },
     "quay.io/cilium/operator-generic": {
-        "v1.18.2": {
-            "hash": "sha256-ya87PbZaRmgLajp79jA+xbJGk04L5+4yWSqCYVhr/Aw=",
-            "digest": "sha256:cb4e4ffc5789fd5ff6a534e3b1460623df61cba00f5ea1c7b40153b5efb81805"
+        "v1.19.0": {
+            "hash": "sha256-9dX46+tjowc1q2ByUTpQAKYPuF2r0vzWj56UNf0ub5E=",
+            "digest": "sha256:5b04006015e5800307dc6314676edc4c0bb7ac2fc7848be2b94b43bb030ab648"
         }
     },
     "quay.io/cilium/hubble-relay": {
-        "v1.18.2": {
-            "hash": "sha256-AW6GsmBGYq2aVw38yh9rOQWdQqDQA0OISld4+oDbWI0=",
-            "digest": "sha256:6079308ee15e44dff476fb522612732f7c5c4407a1017bc3470916242b0405ac"
+        "v1.19.0": {
+            "hash": "sha256-/NBg+mCjS/zrP6Pf5yHUiDns2T1vyh3IEL0i0Fa29aQ=",
+            "digest": "sha256:7f17e5bb51a9f35bbc8e7a9ad5e347f03ff8003c2e5cc81171e8727a10bf03b4"
         }
     },
     "quay.io/cilium/hubble-ui-backend": {
@@ -390,9 +390,9 @@
         }
     },
     "quay.io/cilium/network-perf": {
-        "1755027472-c3d489a": {
-            "hash": "sha256-QE3Kp7qmCSn7W/14sBxrZNcK5T0rl6mQ3jj94Xbqqa0=",
-            "digest": "sha256:ef97611ec03c155a3c37b8ff78af6a8e49bf5e972be860f845a5318cbc72e363"
+        "3.20-1767778631-6ec32c1": {
+            "hash": "sha256-sQ8qqim2wa9t5KqzYYhnjZ6GWbI8FJoXRlEJ529N8tM=",
+            "digest": "sha256:7e119abe9dfe058d1c89aa72bf1528f973646bedfb32a00d9ba36d6f4ed75d43"
         }
     },
     "quay.io/cilium/alpine-curl": {
@@ -402,9 +402,9 @@
         }
     },
     "quay.io/cilium/test-connection-disruption": {
-        "v0.0.16": {
-            "hash": "sha256-T6EZd4UKBSwHMrNmHYrLjeAKpiprRMOKzESExQhUAfM=",
-            "digest": "sha256:e8e3257b2c89543dc49a2d820f2d2d69c1fe60eaf1036fc1f1f7375bad8e6232"
+        "v0.0.17": {
+            "hash": "sha256-XyiKd3QbR5iPVqyiQoJIXuTCdeAmSdbuZaffDxCkXQ4=",
+            "digest": "sha256:62374cfd0e87e6541244331ccf477a21c527c3eefa9d841b97af79996939be0c"
         }
     },
     "quay.io/cilium/json-mock": {
@@ -414,15 +414,21 @@
         }
     },
     "quay.io/frrouting/frr": {
-        "10.4.1": {
-            "hash": "sha256-7S2+MLnGYPy4Zub9Gq4yaclL9noErqspSJmVRuxXJ0c=",
-            "digest": "sha256:97a281a1473cae1f762ceab87cbcc53a2e102053877421e8b4606422aae45442"
+        "10.5.1": {
+            "hash": "sha256-wE9R+z2T3SwBQmcLMOMCS9wvxSTt1lkAoRgrKVuGsWc=",
+            "digest": "sha256:848482643a8d6f56452b659ea68f6138472bb57414a4f295a7c4107a0416269c"
         }
     },
     "docker.io/alpine/socat": {
         "1.8.0.3": {
-            "hash": "sha256-7Lme8uBRYEo0um2OcgsZQ4oA33NQ+G93QQwfUqmG1eE=",
-            "digest": "sha256:accce73b02173c4a3d333e96500c294e5c6ed04e9c64a65cd119fd5a13bff263"
+            "hash": "sha256-lCXIZpBuz6G5tCJK98B0PqFusUp2Fx3B3JMEg50VNzA=",
+            "digest": "sha256:9a44e2731464d8eeb1c1d36fb25c0335fb166ce1064534a2ac53556c4dcd8fb5"
+        }
+    },
+    "quay.io/cilium/cilium-envoy": {
+        "v1.35.9-1768828720-c6e4827ebca9c47af2a3a6540c563c30947bae29": {
+            "hash": "sha256-+DfLnDRsXXlkXwMLvmbUV9Rb/zSmwZpTQCYsLNUEKJ8=",
+            "digest": "sha256:696582a3391ce05a62edb4140e6a99f774351f363f5b5d7f1581f3a244430249"
         }
     }
 }

@@ -1,6 +1,11 @@
 {
   perSystem =
-    { config, pkgs, ... }:
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
     {
       devShells.default = pkgs.mkShell {
         packages = [
@@ -9,7 +14,7 @@
           pkgs.nix-prefetch-docker
           pkgs.nix-eval-jobs
           pkgs.nix-fast-build
-          pkgs.cilium-cli
+          config.legacyPackages.cilium-cli
           (pkgs.python3.withPackages (ps: [
             ps.pydantic
             ps.requests

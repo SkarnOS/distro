@@ -1,8 +1,21 @@
 {
   cilium-cli,
+  fetchFromGitHub,
 }:
+let
+  version = "0.19.1";
+in
 cilium-cli.overrideAttrs (
   _: prevAttrs: {
+    inherit version;
+
+    src = fetchFromGitHub {
+      owner = "cilium";
+      repo = "cilium-cli";
+      tag = "v${version}";
+      hash = "sha256-ZxXFd6ZGptGIixQZyavufb9RlmyHlte5GCQZ1wlKSFA=";
+    };
+
     postPatch = ''
       sed -E --in-place \
         --expr 's~(quay.io/cilium/network-perf:[^@]+)@sha256:[^"]+~\1~' \
