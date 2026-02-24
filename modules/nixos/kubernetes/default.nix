@@ -124,16 +124,20 @@ in
       };
     };
 
-    master = {
-      enable = lib.mkEnableOption "a kubeadm-managed Kubernetes master node";
+    role = {
+      controlPlane = {
+        enable = lib.mkEnableOption "a kubeadm-managed Kubernetes control-plane node";
 
-      allowHelsinkiVpn = lib.mkEnableOption "access to the control plane from the Helsinki VPN";
+        hosts = lib.mkOption {
+          description = "IP addresses of the other hosts to open the firewall";
+          type = lib.types.listOf lib.types.singleLineStr;
+          default = [ ];
+          example = [ "192.168.1.2" ];
+        };
+      };
 
-      hosts = lib.mkOption {
-        description = "IP addresses of the other hosts to open the firewall";
-        type = lib.types.listOf lib.types.singleLineStr;
-        default = [ ];
-        example = [ "192.168.1.2" ];
+      worker = {
+        enable = lib.mkEnableOption "a kubeadm-manager Kubernetes worker node";
       };
     };
 
@@ -316,7 +320,10 @@ in
           apiVersion: kubeadm.k8s.io/v1beta4
           kind: InitConfiguration
           localAPIEndpoint:
-            advertiseAddress: ${builtins.head (builtins.match "([^,]+).*" config.services.kubernetes.kubelet.nodeIp)}
+            ${lib.optionalString (config.services.kubernetes.kubelet.nodeIp != null)
+              "advertiseAddress: ${builtins.head (builtins.match "([^,]+).*" config.services.kubernetes.kubelet.nodeIp)}"
+            }
+
             bindPort: 6443
           nodeRegistration:
             criSocket: unix:///run/containerd/containerd.sock
@@ -370,7 +377,7 @@ in
                 readOnly: true
           ''}
             certSANs: [ "127.0.0.1", "::1", "api.${cfg.clusterName}.k8s.helsinki.tools"${
-              lib.concatMapStringsSep "" (ip: ", \"${ip}\"") cfg.master.hosts
+              lib.concatMapStringsSep "" (ip: ", \"${ip}\"") cfg.role.controlPlane.hosts
             } ]
           proxy:
             disabled: true
@@ -654,7 +661,45 @@ in
       };
     };
 
-    systemd.services."kubeadm-init" = {
+    # systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
+    #   requiredBy = [ "kubernetes-full.target" ];
+    #   before = [ "kubernetes-full.target" ];
+
+    #   script =
+    #     let
+    #       tokenFilter = ''
+    #         [
+    #           .[] | select(
+    #                 .kind == "BootstrapToken"
+    #             and ( reduce ((.groups // []) [] | contains("bootstrappers") ) as $b (false; . or $b))
+    #             and (.expires | fromdateiso8601) > now
+    #           )
+    #         ][0].token
+    #       '';
+    #     in
+    #     ''
+    #       _tmpdir="$(mktemp -d)"
+
+    #       function _ssh () {
+    #         ssh -o ControlMaster=yes -o ControlPath "$_tmpdir/control_master" "$@"
+    #       }
+
+    #       function _get_token() {
+    #         _ssh "$_control_plane" kubeadm token create --ttl 1h
+    #       }
+
+    #       _token="$(get_token)"
+    #       _cert_digest"$(openssl x509 -pubkey -in <(_ssh "$_control_plane" cat /etc/kubernetes/pki/ca.crt) \
+    #                        | openssl rsa -pubin -outform der 2>/dev/null \
+    #                        | openssl dgst -sha256 -hex
+    #                        | cut -f2 -d" ")"
+
+    #       echo "$_token"
+    #       echo "$_cert_digest"
+    #     '';
+    # };
+
+    systemd.services."kubeadm-init" = lib.mkIf cfg.role.controlPlane.enable {
       requiredBy = [ "kubernetes-full.target" ];
       before = [ "kubernetes-full.target" ];
 
@@ -663,14 +708,45 @@ in
         pkgs.util-linux
         pkgs.cni-plugins
         pkgs.cni-plugin-flannel
+        pkgs.yq-go
+        pkgs.jq
+        pkgs.iproute2
       ];
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
       serviceConfig = {
+        RuntimeDirectory = "kubeadm-init";
         ExecStart = [
-          "${lib.getExe' config.services.kubernetes.package "kubeadm"} init --config /etc/kubernetes/kubeadm-cp-init.yaml --ignore-preflight-errors=all --upload-certs"
+          (pkgs.writeShellScript "kubeadm-init.sh" ''
+            set -eEuo pipefail
+
+            _config="$RUNTIME_DIRECTORY/kubeadm-cp-init.yaml"
+            cp /etc/kubernetes/kubeadm-cp-init.yaml "$_config"
+
+            ${lib.optionalString (cfg.network.internal.interface != null) ''
+              _interface_ip="$(ip --json  addr | jq '[.[] | select(.ifname == "${cfg.network.internal.interface}") | .addr_info[] | select(.family == "inet")] | first | .local' --raw-output)"
+
+              if [[ "$_interface_ip" == "null" ]] ; then
+                echo "could not figure out primary IP address of ${cfg.network.internal.interface}, exiting..."
+                exit 1
+              fi
+
+              echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress'"
+
+              yq --inplace \
+                 'with(select(.kind == "InitConfiguration"); .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'")' \
+                 "$_config"
+            ''}
+
+            kubeadm init \
+              --config /etc/kubernetes/kubeadm-cp-init.yaml \
+              --ignore-preflight-errors=all \
+              --upload-certs
+          '')
           (pkgs.writeShellScript "kubeadm-approve-all-certs.sh" ''
+            set -eEuo pipefail
+
             while ! mapfile -d ' ' _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" < 3 ]] ; do
               echo "waiting for 3 CSRs, so far have ''${#_csrs[@]}"
               sleep 5
