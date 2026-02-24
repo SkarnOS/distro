@@ -61,6 +61,10 @@ in
     services.kubernetes.package =
       inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.kubernetes."1_35";
 
+    services.resolved.settings.Resolve = {
+      DNSStubListenerExtra = "10.224.6.1";
+    };
+
     rename-me.kubernetes = {
       enable = true;
       network = {
