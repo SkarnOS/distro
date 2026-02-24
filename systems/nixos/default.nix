@@ -1,0 +1,5 @@
+{
+  imports = [
+    ./control-plane.nix
+  ];
+}

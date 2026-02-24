@@ -11,48 +11,6 @@
   inputs,
 }:
 let
-  localRouterIpv4 = "10.224.6.1";
-  ipv4NativeRoutingCIDR = "10.100.0.0/16";
-  ciliumParams = {
-    "bpf.masquerade" = "true";
-    # "ipv6.enabled" = "true"; # no need for now
-    "ipam.mode" = "kubernetes";
-    "bpf.lbExternalClusterIP" = "true";
-    "envoy.enabled" = "false";
-    "encryption.enabled" = "true";
-    "encryption.type" = "wireguard";
-    "k8sServiceHost" = "127.0.0.1";
-    "image.useDigest" = "false";
-    "certgen.useDigest" = "false";
-    "hubble.relay.image.useDigest" = "false";
-    "hubble.ui.enabled" = "true";
-    "hubble.relay.enabled" = "true";
-    "hubble.ui.backend.image.useDigest" = "false";
-    "hubble.ui.frontend.image.useDigest" = "false";
-    "envoy.image.useDigest" = "false";
-    "operator.image.useDigest" = "false";
-    "nodeinit.image.useDigest" = "false";
-    "preflight.image.useDigest" = "false";
-    "preflight.envoy.image.useDigest" = "false";
-    "clustermesh.apiserver.image.useDigest" = "false";
-    "authentication.mutual.spire.install.initImage.useDigest" = "false";
-    "authentication.mutual.spire.install.agent.image.useDigest" = "false";
-    "authentication.mutual.spire.install.server.image.useDigest" = "false";
-    "standaloneDnsProxy.image.useDigest" = "false";
-    # added so i can hardcode the address
-    "extraArgs[0]" = "--local-router-ipv4=${localRouterIpv4}";
-    "routingMode" = "native";
-    "endpointRoutes.enabled" = "true";
-    "debug.enabled" = "true";
-    inherit ipv4NativeRoutingCIDR;
-  };
-
-  containerImages = writers.writeText "container-images" (
-    lib.concatMapStringsSep "\n" ({ name, value }: lib.concatStringsSep "\n" value) (
-      lib.mapAttrsToList lib.nameValuePair kubernetes.passthru.containers
-    )
-  );
-
   sshBackdoor = {
     users.users.root.hashedPassword = "";
     services.openssh.settings.PermitRootLogin = "yes";
@@ -159,7 +117,7 @@ testers.nixosTest {
         services.kubernetes.package = kubernetes;
 
         services.resolved.settings.Resolve = {
-          DNSStubListenerExtra = localRouterIpv4;
+          DNSStubListenerExtra = "10.224.6.1";
         };
 
         networking.firewall.enable = false;
@@ -167,9 +125,12 @@ testers.nixosTest {
         rename-me.kubernetes = {
           enable = true;
           network = {
-            cni."cilium" = { };
+            cni."cilium" = {
+              localIpv4 = "10.224.6.1";
+              ipv4NativeRoutingCIDR = "10.100.0.0/16";
+            };
             ingress.interface = "eth0";
-            nameservers = [ localRouterIpv4 ];
+            nameservers = [ "10.224.6.1" ];
           };
           clusterName = "test-cluster";
         };
@@ -185,22 +146,9 @@ testers.nixosTest {
 
   testScript = ''
     import json
-    from pathlib import Path
     from functools import reduce
     import operator
     import ipaddress
-
-    def approve_certificates(last):
-      csrs = machine.succeed("kubectl get csr -o jsonpath='{.items[*].metadata.name}'").split(" ")
-      print(csrs)
-      if len(csrs) < 3:
-        return False
-      machine.succeed(f"kubectl certificate approve {' '.join(csrs)}")
-      return True
-
-    def wait_for_ready(last):
-      nodes = machine.succeed("kubectl get nodes")
-      return "NotReady" in nodes
 
     def get_ip_address(machine):
       address, prefix = next(
@@ -217,33 +165,8 @@ testers.nixosTest {
 
       return ipv4_address, ipv4_network
 
-    machine.wait_for_unit("multi-user.target")
+    machine.wait_for_unit("kubernetes-full.target")
     httpServer.wait_for_unit("nginx.service")
-
-    machine.succeed("${lib.getExe parallel} -- ${lib.getExe' containerd "ctr"} -n k8s.io image import < ${containerImages}")
-
-    cilium_params: list[str] = reduce(
-      operator.add,
-      map(
-        lambda param: ["--set", f"{param[0]}={param[1]}"],
-        json.loads(Path("${writers.writeJSON "cilium-params.json" ciliumParams}").read_text()).items()
-      )
-    )
-
-    machine.succeed("kubeadm init --config /etc/kubernetes/kubeadm-cp-init.yaml --ignore-preflight-errors=all --upload-certs")
-
-    retry(approve_certificates)
-
-    retry(wait_for_ready)
-
-    machine.succeed("kubectl taint nodes --all node-role.kubernetes.io/control-plane-")
-
-    machine.succeed(" ".join([
-      "cilium",
-      "install",
-      "--version", "${kubernetes.passthru.cilium_image_version}",
-      *cilium_params
-    ]))
 
     machine.succeed("cilium status --wait")
     machine.succeed("cilium hubble enable --ui")
@@ -266,7 +189,6 @@ testers.nixosTest {
       "--external-other-ip", str(httpServer_other_address),
       "--curl-insecure",
       "--debug", "--verbose",
-      "--pause-on-fail",
       "--hubble", "--flow-validation warning",
       "--test tls-intercept", "--test to-service"
     ]))

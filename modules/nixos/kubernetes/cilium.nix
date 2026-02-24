@@ -1,3 +1,4 @@
+{ inputs }:
 {
   lib,
   pkgs,
@@ -13,6 +14,71 @@ let
       { enable = false; };
 in
 {
+  options.rename-me.kubernetes.network.cni = lib.mkOption {
+    type = lib.types.attrTag {
+      "cilium" = lib.mkOption {
+        type = lib.types.submodule {
+          options = {
+            package = lib.mkPackageOption pkgs "cilium-cli" { } // {
+              default = inputs.self.legacyPackages.${pkgs.hostPlatform.system}.cilium-cli;
+            };
+
+            localIpv4 = lib.mkOption {
+              type = lib.types.str;
+            };
+
+            ipv4NativeRoutingCIDR = lib.mkOption {
+              type = lib.types.str;
+            };
+
+            values = lib.mkOption {
+              type = (pkgs.formats.yaml { }).type;
+              default = { };
+            };
+          };
+
+          config = {
+            values = {
+              bpf.masquerade = true;
+              # "ipv6.enabled" = true; # no need for now
+              ipam.mode = "kubernetes";
+              bpf.lbExternalClusterIP = true;
+              envoy.enabled = false;
+              encryption.enabled = true;
+              encryption.type = "wireguard";
+              k8sServiceHost = "127.0.0.1";
+              image.useDigest = false;
+              certgen.useDigest = false;
+              hubble.relay.image.useDigest = false;
+              hubble.ui.enabled = true;
+              hubble.relay.enabled = true;
+              hubble.ui.backend.image.useDigest = false;
+              hubble.ui.frontend.image.useDigest = false;
+              envoy.image.useDigest = false;
+              operator.image.useDigest = false;
+              nodeinit.image.useDigest = false;
+              preflight.image.useDigest = false;
+              preflight.envoy.image.useDigest = false;
+              clustermesh.apiserver.image.useDigest = false;
+              authentication.mutual.spire.install.initImage.useDigest = false;
+              authentication.mutual.spire.install.agent.image.useDigest = false;
+              authentication.mutual.spire.install.server.image.useDigest = false;
+              standaloneDnsProxy.image.useDigest = false;
+              # added so i can hardcode the address
+              extraArgs = [ "--local-router-ipv4=${cfg.localIpv4}" ];
+              routingMode = "native";
+              endpointRoutes.enabled = true;
+              debug.enabled = true;
+              # not needed for now
+              inherit (cfg) ipv4NativeRoutingCIDR;
+            };
+          };
+        };
+        default = { };
+      };
+    };
+  };
+
   config = lib.mkIf (cfgK8s.enable && cfg.enable) {
     rename-me.kubernetes.network.internal.extraNetworkdConfig =
       lib.mkIf (cfgK8s.network.internal.interface == null)
@@ -80,5 +146,29 @@ in
     services.kubernetes.kubelet.nodeIp = lib.mkIf (
       cfgK8s.network.internal.interface == null
     ) "192.168.8.1,fd08:4e1::1";
+
+    systemd.services."kube-cilium-install" = {
+      requiredBy = [ "kubernetes-full.target" ];
+      requires = [ "kubeadm-init.service" ];
+      after = [ "kubeadm-init.service" ];
+
+      environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
+
+      serviceConfig =
+        let
+          cilium-cli = inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}."cilium-cli";
+        in
+        {
+          SetLoginEnvironment = "yes";
+          ExecStart = [
+            "${lib.getExe cilium-cli} install --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values ${
+              (pkgs.formats.yaml { }).generate "cilium-values.yaml" cfg.values
+            }"
+            "${lib.getExe cilium-cli} status --wait"
+          ];
+          Type = "oneshot";
+          RemainAfterExit = "yes";
+        };
+    };
   };
 }

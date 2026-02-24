@@ -22,9 +22,9 @@ in
 {
 
   imports = [
-    ./firewall.nix
+    (lib.modules.importApply ./cilium.nix { inherit inputs; })
     ./flannel.nix
-    ./cilium.nix
+    ./firewall.nix
   ];
 
   options.rename-me.kubernetes = {
@@ -69,16 +69,6 @@ in
           # TODO: remove
           "flannel" = lib.mkOption {
             type = lib.types.submodule { };
-            default = { };
-          };
-          "cilium" = lib.mkOption {
-            type = lib.types.submodule {
-              options = {
-                package = lib.mkPackageOption pkgs "cilium-cli" { } // {
-                  default = inputs.self.legacyPackages.${pkgs.hostPlatform.system}.cilium-cli;
-                };
-              };
-            };
             default = { };
           };
         };
@@ -636,6 +626,64 @@ in
           "${ingressInterfaceName}" = cfg.network.ingress.extraNetworkdConfig;
         })
       ];
+    };
+
+    systemd.targets."kubernetes-full" = {
+      wantedBy = [ "multi-user.target" ];
+      after = [ "multi-user.target" ];
+    };
+
+    systemd.services."kubernetes-image-preload" = {
+      requiredBy = [ "kubeadm-init.service" ];
+      before = [ "kubeadm-init.service" ];
+      after = [ "containerd.service" ];
+
+      script =
+        let
+          containerImages = pkgs.writers.writeText "container-images" (
+            lib.concatMapStringsSep "\n" ({ name, value }: lib.concatStringsSep "\n" value) (
+              lib.mapAttrsToList lib.nameValuePair config.services.kubernetes.package.passthru.containers
+            )
+          );
+        in
+        "${lib.getExe pkgs.parallel} -- ${lib.getExe' pkgs.containerd "ctr"} -n k8s.io image import < ${containerImages}";
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = "yes";
+      };
+    };
+
+    systemd.services."kubeadm-init" = {
+      requiredBy = [ "kubernetes-full.target" ];
+      before = [ "kubernetes-full.target" ];
+
+      path = [
+        config.services.kubernetes.package
+        pkgs.util-linux
+        pkgs.cni-plugins
+        pkgs.cni-plugin-flannel
+      ];
+
+      environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
+
+      serviceConfig = {
+        ExecStart = [
+          "${lib.getExe' config.services.kubernetes.package "kubeadm"} init --config /etc/kubernetes/kubeadm-cp-init.yaml --ignore-preflight-errors=all --upload-certs"
+          (pkgs.writeShellScript "kubeadm-approve-all-certs.sh" ''
+            while ! mapfile -d ' ' _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" < 3 ]] ; do
+              echo "waiting for 3 CSRs, so far have ''${#_csrs[@]}"
+              sleep 5
+            done
+            for _csr in "''${_csrs[@]}" ; do
+              kubectl certificate approve $_csr
+            done
+          '')
+          "${lib.getExe' config.services.kubernetes.package "kubectl"} taint nodes --all node-role.kubernetes.io/control-plane-"
+        ];
+        Type = "oneshot";
+        RemainAfterExit = "yes";
+      };
     };
   };
 }
