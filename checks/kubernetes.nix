@@ -43,6 +43,7 @@ let
     "extraArgs[0]" = "--local-router-ipv4=${localRouterIpv4}";
     "routingMode" = "native";
     "endpointRoutes.enabled" = "true";
+    "debug.enabled" = "true";
     inherit ipv4NativeRoutingCIDR;
   };
 
@@ -94,6 +95,11 @@ testers.nixosTest {
 
         services.nginx = {
           enable = true;
+
+          appendHttpConfig = ''
+            error_log stderr;
+            access_log syslog:server=unix:/dev/log combined;
+          '';
 
           virtualHosts."k8s.io" = {
             addSSL = true;
@@ -182,6 +188,7 @@ testers.nixosTest {
     from pathlib import Path
     from functools import reduce
     import operator
+    import ipaddress
 
     def approve_certificates(last):
       csrs = machine.succeed("kubectl get csr -o jsonpath='{.items[*].metadata.name}'").split(" ")
@@ -194,6 +201,21 @@ testers.nixosTest {
     def wait_for_ready(last):
       nodes = machine.succeed("kubectl get nodes")
       return "NotReady" in nodes
+
+    def get_ip_address(machine):
+      address, prefix = next(
+          (address["local"], str(address["prefixlen"])) for address in reduce(
+            operator.add,
+            (interface["addr_info"] for interface in json.loads(httpServer.succeed("ip --json addr"))
+              if interface["ifname"] == "eth1"),
+            [])
+            if address["family"] == "inet"
+        )
+
+      ipv4_address = ipaddress.IPv4Address(address)
+      ipv4_network = ipaddress.IPv4Network(address + "/" + prefix, strict = False)
+
+      return ipv4_address, ipv4_network
 
     machine.wait_for_unit("multi-user.target")
     httpServer.wait_for_unit("nginx.service")
@@ -226,14 +248,27 @@ testers.nixosTest {
     machine.succeed("cilium status --wait")
     machine.succeed("cilium hubble enable --ui")
 
+    httpServer_address, httpServer_network = get_ip_address(httpServer)
+    machine_address, machine_network = get_ip_address(machine)
 
-    machine.succeed(" ".join([
+    httpServer_other_address = httpServer_address + 29
+    assert httpServer_other_address != machine_address
+    assert httpServer_other_address in httpServer_network
+    assert httpServer_network == machine_network
+
+    machine.succeed("cilium hubble port-forward >/dev/console &")
+
+    machine.execute(" ".join([
       "cilium connectivity test",
       "--single-node",
-      "--external-ip", "10.0.2.15",
-      "--external-ip", "10.0.2.15",
+      "--external-cidr", str(httpServer_network),
+      "--external-ip", str(httpServer_address),
+      "--external-other-ip", str(httpServer_other_address),
       "--curl-insecure",
-      "--debug", "--verbose"
+      "--debug", "--verbose",
+      "--pause-on-fail",
+      "--hubble", "--flow-validation warning",
+      "--test tls-intercept", "--test to-service"
     ]))
   '';
 }
