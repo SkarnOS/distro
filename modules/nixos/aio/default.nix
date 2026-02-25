@@ -36,6 +36,66 @@ in
         "mbr"
       ];
     };
+
+    networking = {
+      nodeIp = lib.mkOption {
+        type = lib.types.str;
+      };
+
+      nodeNetworkCidr = lib.mkOption {
+        type = lib.types.str;
+      };
+
+      uplink = {
+        macAddress = lib.mkOption {
+          type = lib.types.str;
+        };
+
+        address = {
+          static = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ ];
+          };
+
+          dhcp = lib.mkOption {
+            type = lib.types.enum [
+              "ipv4"
+              "ipv6"
+              true
+              false
+            ];
+            default = false;
+          };
+        };
+      };
+      internal = {
+        macAddress = lib.mkOption {
+          type = lib.types.str;
+        };
+
+        address = {
+          static = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ ];
+          };
+
+          dhcp = lib.mkOption {
+            type = lib.types.enum [
+              "ipv4"
+              "ipv6"
+              true
+              false
+            ];
+            default = false;
+          };
+        };
+      };
+    };
+
+    role = {
+      controlPlane.enable = lib.mkEnableOption "";
+      worker.enable = lib.mkEnableOption "";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -43,57 +103,64 @@ in
     users.mutableUsers = false;
 
     systemd.network.enable = true;
-    networking.useNetworkd = true;
-    networking.firewall.enable = lib.mkForce false;
+    networking = {
+      useNetworkd = true;
+      firewall = {
+        logRefusedPackets = true;
+        trustedInterfaces = [
+          "lxc+"
+          "kube-int"
+        ];
+      };
+    };
 
     services.cloud-init.enable = lib.mkForce false;
 
     systemd.network.links."10-uplink" = {
-      matchConfig.PermanentMACAddress = "92:00:07:44:f5:5d";
+      matchConfig.PermanentMACAddress = cfg.networking.uplink.macAddress;
       linkConfig.Name = "uplink";
     };
 
     systemd.network.networks."10-uplink" = {
       matchConfig.Name = "uplink";
       networkConfig = {
-        DHCP = "ipv4";
-        Address = "2a01:4f8:1c19:2251::2/64";
+        DHCP = cfg.networking.uplink.address.dhcp;
+        Address = cfg.networking.uplink.address.static;
       };
     };
 
     systemd.network.links."10-int" = {
-      matchConfig.PermanentMACAddress = "86:00:00:76:6d:d0";
+      matchConfig.PermanentMACAddress = cfg.networking.internal.macAddress;
       linkConfig.Name = "kube-int";
     };
 
     systemd.network.networks."10-int" = {
       matchConfig.Name = "kube-int";
-      networkConfig.DHCP = "yes";
+      networkConfig.DHCP = cfg.networking.internal.address.dhcp;
     };
 
     services.kubernetes.package =
       inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.kubernetes."1_35";
 
     services.resolved.settings.Resolve = {
-      DNSStubListenerExtra = "10.224.6.1";
+      DNSStubListenerExtra = cfg.networking.nodeIp;
     };
 
     rename-me.kubernetes = {
       enable = true;
       network = {
         cni."cilium" = {
-          localIpv4 = "10.224.6.1";
-          ipv4NativeRoutingCIDR = "10.100.0.0/16";
+          localIpv4 = cfg.networking.nodeIp;
+          ipv4NativeRoutingCIDR = cfg.networking.nodeNetworkCidr;
         };
         internal.interface = "kube-int";
         ingress.interface = "uplink";
-        nameservers = [ "10.224.6.1" ];
+        nameservers = [ cfg.networking.nodeIp ];
       };
       clusterName = "test-cluster";
 
-      role.controlPlane = {
-        enable = true;
-      };
+      role.controlPlane.enable = cfg.role.controlPlane.enable;
+      role.worker.enable = cfg.role.worker.enable;
     };
 
     environment.systemPackages = [

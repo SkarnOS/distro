@@ -725,22 +725,22 @@ in
             cp /etc/kubernetes/kubeadm-cp-init.yaml "$_config"
 
             ${lib.optionalString (cfg.network.internal.interface != null) ''
-              _interface_ip="$(ip --json  addr | jq '[.[] | select(.ifname == "${cfg.network.internal.interface}") | .addr_info[] | select(.family == "inet")] | first | .local' --raw-output)"
-
-              if [[ "$_interface_ip" == "null" ]] ; then
-                echo "could not figure out primary IP address of ${cfg.network.internal.interface}, exiting..."
-                exit 1
-              fi
+              _interface_ip=$(${
+                lib.getExe (pkgs.callPackage ./fish-out-netif-ip.nix { })
+              } ${cfg.network.internal.interface})
 
               echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress'"
 
               yq --inplace \
-                 'with(select(.kind == "InitConfiguration"); .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'")' \
+                 'with(select(.kind == "InitConfiguration"); .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'")
+                   | with(select(.kind == "ClusterConfiguration");
+                     .apiServer.certSANs = .apiServer.certSANs + [ "'"$_interface_ip"'" ]
+                     | .controlPlaneEndpoint = "'"$_interface_ip"':6443" )' \
                  "$_config"
             ''}
 
             kubeadm init \
-              --config /etc/kubernetes/kubeadm-cp-init.yaml \
+              --config "$_config" \
               --ignore-preflight-errors=all \
               --upload-certs
           '')

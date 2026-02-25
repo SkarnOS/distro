@@ -147,28 +147,47 @@ in
       cfgK8s.network.internal.interface == null
     ) "192.168.8.1,fd08:4e1::1";
 
-    systemd.services."kube-cilium-install" = {
+    systemd.services."kube-cilium-install" = lib.mkIf cfgK8s.role.controlPlane.enable {
       requiredBy = [ "kubernetes-full.target" ];
       requires = [ "kubeadm-init.service" ];
       after = [ "kubeadm-init.service" ];
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
-      serviceConfig =
-        let
-          cilium-cli = inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}."cilium-cli";
-        in
-        {
-          SetLoginEnvironment = "yes";
-          ExecStart = [
-            "${lib.getExe cilium-cli} install --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values ${
-              (pkgs.formats.yaml { }).generate "cilium-values.yaml" cfg.values
-            }"
-            "${lib.getExe cilium-cli} status --wait"
-          ];
-          Type = "oneshot";
-          RemainAfterExit = "yes";
-        };
+      # _interface_ip=$(${callPackage ./fish-out-netif-ip.nix { }} ${cfg.network.internal.interface})
+
+      path = [
+        inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}."cilium-cli"
+        pkgs.yq-go
+      ];
+
+      script = ''
+        _config_file="$RUNTIME_DIRECTORY/values.yaml"
+
+        cp --no-preserve=all ${
+          (pkgs.formats.yaml { }).generate "cilium-values.yaml" cfg.values
+        } "$_config_file"
+
+        _interface_ip=$(${
+          lib.getExe (pkgs.callPackage ./fish-out-netif-ip.nix { })
+        } ${cfgK8s.network.internal.interface})
+
+        echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress'"
+
+        yq --inplace \
+           '.k8s.apiServerURLs = ( [ "'"$_interface_ip"':6443" ] | join(" ") )' \
+           "$_config_file"
+
+        cilium upgrade --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
+        cilium status --wait
+      '';
+
+      serviceConfig = {
+        SetLoginEnvironment = "yes";
+        Type = "oneshot";
+        RemainAfterExit = "yes";
+        RuntimeDirectory = "kube-cilium-install";
+      };
     };
   };
 }
