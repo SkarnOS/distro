@@ -178,7 +178,7 @@ in
            '.k8s.apiServerURLs = ( [ "'"$_interface_ip"':6443" ] | join(" ") )' \
            "$_config_file"
 
-        cilium upgrade --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
+        cilium install --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
         cilium status --wait
       '';
 

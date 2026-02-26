@@ -1,15 +1,17 @@
 #!/usr/bin/env nix
 #! nix shell nixpkgs#openssl -c bash --
 
-set -euEo pipefail
+set -xeuEo pipefail
 
 _control_plane="$1"
+_worker="$2"
 
 _tmpdir="$(mktemp -d)"
 trap "rm -r $_tmpdir" EXIT
 
 function _ssh () {
-  ssh -o ControlMaster=auto -o ControlPath="$_tmpdir/control_master" "$@"
+    ssh -o ControlMaster=auto -o ControlPath="$_tmpdir/control_master_%C
+" "$@"
 }
 
 function _get_token() {
@@ -21,6 +23,12 @@ _cert_digest="$(openssl x509 -pubkey -in <(_ssh "$_control_plane" cat /etc/kuber
                  | openssl rsa -pubin -outform der 2>/dev/null \
                  | openssl dgst -sha256 -hex \
                  | cut -f2 -d" ")"
+_control_plane_address="$(_ssh "$_control_plane" fish-out-netif-ip kube-int)"
 
-echo "$_token"
-echo "$_cert_digest"
+_ssh "$_worker" "mkdir -p /var/lib/kubeadm-join ; umask 0077 ; touch /var/lib/kubeadm-join/secret.env"
+_ssh "$_worker" "cat > /var/lib/kubeadm-join/secret.env" <<EOF
+_control_plane_address="$_control_plane_address"
+_join_token="$_token"
+_discovery_token_ca_cert_hash="sha256:$_cert_digest"
+EOF
+_ssh "$_worker" "systemctl restart kubernetes-full.target"

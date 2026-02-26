@@ -18,6 +18,8 @@ let
   ingressInterfaceName =
     cfg.network.ingress.interface
     + lib.optionalString (cfg.network.ingress.vlanId != null) ".${toString cfg.network.ingress.vlanId}";
+
+  fishOutNetifIp = pkgs.callPackage ./fish-out-netif-ip.nix { };
 in
 {
 
@@ -206,12 +208,17 @@ in
         conntrack-tools
         iptables-nftables-compat
       ]
-      ++ (lib.optionals (cfg.upgradePackage != null) [
-        (pkgs.runCommand "kubeadm-upgrade" { inherit (cfg) upgradePackage; } ''
+      ++ (lib.optional (cfg.upgradePackage != null) (
+        pkgs.runCommand "kubeadm-upgrade" { inherit (cfg) upgradePackage; } ''
           mkdir -p $out/bin
           cp $upgradePackage/bin/kubeadm $out/bin/upgrade-kubeadm
-        '')
-      ]);
+        ''
+      ))
+      ++ [
+        fishOutNetifIp
+      ];
+
+    systemd.services.kubelet.serviceConfig.EnvironmentFile = "/var/lib/kubelet/kubeadm-flags.env";
 
     services = {
       kubernetes = {
@@ -222,20 +229,22 @@ in
           registerNode = true; # why not?
           clusterDns =
             if (lib.versionAtLeast (lib.versions.majorMinor lib.version) "24.11") then [ "" ] else ""; # don't overwrite my DNS
-          extraOpts = lib.escapeShellArgs [
-            # allow having swap
-            "--fail-swap-on=false"
-            # use kubeadm init things
-            "--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf"
-            "--kubeconfig=/etc/kubernetes/kubelet.conf"
-            "--config=/var/lib/kubelet/config.yaml"
-            # Only use 3 DNS servers to prevent annoying warning
-            "--resolv-conf=${
-              pkgs.writeText "kubelet-resolv.conf" (
-                lib.concatMapStringsSep "\n" (ns: "nameserver ${ns}") cfg.network.nameservers
-              )
-            }"
-          ];
+          extraOpts =
+            (lib.escapeShellArgs [
+              # allow having swap
+              "--fail-swap-on=false"
+              # use kubeadm init things
+              "--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf"
+              "--kubeconfig=/etc/kubernetes/kubelet.conf"
+              "--config=/var/lib/kubelet/config.yaml"
+              # Only use 3 DNS servers to prevent annoying warning
+              "--resolv-conf=${
+                pkgs.writeText "kubelet-resolv.conf" (
+                  lib.concatMapStringsSep "\n" (ns: "nameserver ${ns}") cfg.network.nameservers
+                )
+              }"
+            ])
+            + " \${KUBELET_KUBEADM_ARGS}";
         };
         # Features we don't need on a stacked control plane
         proxy.enable = false;
@@ -699,6 +708,54 @@ in
     #     '';
     # };
 
+    systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
+      requiredBy = [ "kubernetes-full.target" ];
+      before = [ "kubernetes-full.target" ];
+
+      path = [
+        config.services.kubernetes.package
+        pkgs.util-linux
+        pkgs.yq-go
+        pkgs.jq
+        pkgs.iproute2
+        fishOutNetifIp
+      ];
+
+      environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
+
+      serviceConfig = {
+        RuntimeDirectory = "kubeadm-join";
+        StateDirectory = "kubeadm-join";
+        ConditionPathExists = "/var/lib/kubeadm-join/secret.env";
+        EnvironmentFile = "/var/lib/kubeadm-join/secret.env";
+        Type = "oneshot";
+        RemainAfterExit = "yes";
+      };
+
+      script = ''
+        set -eEuo pipefail
+
+        ${lib.optionalString (cfg.network.internal.interface != null) ''
+          _kubelet_patch="$RUNTIME_DIRECTORY/kubeletconfiguratio0+strategic.yaml"
+          touch "$_kubelet_patch"
+
+          _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
+
+          echo "Using $_interface_ip as 'node-ip'"
+
+          yq --inplace \
+             '.nodeIp = "'"$_interface_ip"'"' \
+             "$_kubelet_patch"
+        ''}
+
+        kubeadm join \
+          "$_control_plane_address:6443" \
+          --patches "$RUNTIME_DIRECTORY" \
+          --token "$_join_token" \
+          --discovery-token-ca-cert-hash "$_discovery_token_ca_cert_hash"
+      '';
+    };
+
     systemd.services."kubeadm-init" = lib.mkIf cfg.role.controlPlane.enable {
       requiredBy = [ "kubernetes-full.target" ];
       before = [ "kubernetes-full.target" ];
@@ -706,11 +763,10 @@ in
       path = [
         config.services.kubernetes.package
         pkgs.util-linux
-        pkgs.cni-plugins
-        pkgs.cni-plugin-flannel
         pkgs.yq-go
         pkgs.jq
         pkgs.iproute2
+        fishOutNetifIp
       ];
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
@@ -725,16 +781,16 @@ in
             cp /etc/kubernetes/kubeadm-cp-init.yaml "$_config"
 
             ${lib.optionalString (cfg.network.internal.interface != null) ''
-              _interface_ip=$(${
-                lib.getExe (pkgs.callPackage ./fish-out-netif-ip.nix { })
-              } ${cfg.network.internal.interface})
+              _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
 
-              echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress'"
+              echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
 
               yq --inplace \
-                 'with(select(.kind == "InitConfiguration"); .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'")
+                 '   with(select(.kind == "InitConfiguration");
+                       .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
+                     | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])
                    | with(select(.kind == "ClusterConfiguration");
-                     .apiServer.certSANs = .apiServer.certSANs + [ "'"$_interface_ip"'" ]
+                       .apiServer.certSANs = .apiServer.certSANs + [ "'"$_interface_ip"'" ]
                      | .controlPlaneEndpoint = "'"$_interface_ip"':6443" )' \
                  "$_config"
             ''}
