@@ -20,6 +20,78 @@ let
     + lib.optionalString (cfg.network.ingress.vlanId != null) ".${toString cfg.network.ingress.vlanId}";
 
   fishOutNetifIp = pkgs.callPackage ./fish-out-netif-ip.nix { };
+
+  kubeadmConfig = pkgs.writeText "kubeadm-config.yaml" ''
+    ---
+    apiVersion: kubeadm.k8s.io/v1beta4
+    kind: InitConfiguration
+    localAPIEndpoint:
+      ${lib.optionalString (config.services.kubernetes.kubelet.nodeIp != null)
+        "advertiseAddress: ${builtins.head (builtins.match "([^,]+).*" config.services.kubernetes.kubelet.nodeIp)}"
+      }
+
+      bindPort: 6443
+    nodeRegistration:
+      criSocket: unix:///run/containerd/containerd.sock
+    ---
+    apiVersion: kubeadm.k8s.io/v1beta4
+    kind: ClusterConfiguration
+    clusterName: ${cfg.clusterName}
+    kubernetesVersion: ${config.services.kubernetes.package.version}
+    controlPlaneEndpoint: "127.0.0.1:${if cfg.haapi.enable then "6444" else "6443"}"
+    networking:
+      # dnsDomain: ${cfg.clusterName}.k8s.helsinki.tools
+      podSubnet: 10.224.0.0/11,fd08:4e1:1::/52
+      serviceSubnet: 10.96.0.0/12,fd08:4e1:2::/108
+    controllerManager:
+      extraArgs:
+        - name: node-cidr-mask-size-ipv4
+          value: "21"
+        - name: node-cidr-mask-size-ipv6
+          value: "62"
+    apiServer:
+      extraArgs:
+    ${lib.optionalString (cfg.elmaAudience != null) ''
+      #
+        - name: authentication-config
+          value: /oidc.yaml
+        - name: authorization-mode
+          value: Node,RBAC
+    ''}
+    ${lib.optionalString (cfg.encryptionProviderConfig != null) ''
+      #
+        - name: feature-gates
+          value: StructuredAuthenticationConfiguration=true
+        - name: encryption-provider-config
+          value: /encryption-provider.yaml
+    ''}
+      extraVolumes:
+    ${lib.optionalString (cfg.elmaAudience != null) ''
+      #
+        - hostPath: /etc/kubernetes/oidc.yaml
+          mountPath: /oidc.yaml
+          name: oidc-config
+          pathType: File
+          readOnly: true
+    ''}
+    ${lib.optionalString (cfg.encryptionProviderConfig != null) ''
+      #
+        - hostPath: ${cfg.encryptionProviderConfig}
+          mountPath: /encryption-provider.yaml
+          name: encryption-config
+          pathType: File
+          readOnly: true
+    ''}
+      certSANs: [ "127.0.0.1", "::1", "api.${cfg.clusterName}.k8s.helsinki.tools"${
+        lib.concatMapStringsSep "" (ip: ", \"${ip}\"") cfg.role.controlPlane.hosts
+      } ]
+    proxy:
+      disabled: true
+    ---
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    serverTLSBootstrap: true
+  '';
 in
 {
 
@@ -324,77 +396,6 @@ in
               '';
           };
         */
-        "kubernetes/kubeadm-cp-init.yaml".text = ''
-          ---
-          apiVersion: kubeadm.k8s.io/v1beta4
-          kind: InitConfiguration
-          localAPIEndpoint:
-            ${lib.optionalString (config.services.kubernetes.kubelet.nodeIp != null)
-              "advertiseAddress: ${builtins.head (builtins.match "([^,]+).*" config.services.kubernetes.kubelet.nodeIp)}"
-            }
-
-            bindPort: 6443
-          nodeRegistration:
-            criSocket: unix:///run/containerd/containerd.sock
-          ---
-          apiVersion: kubeadm.k8s.io/v1beta4
-          kind: ClusterConfiguration
-          clusterName: ${cfg.clusterName}
-          kubernetesVersion: ${config.services.kubernetes.package.version}
-          controlPlaneEndpoint: "127.0.0.1:${if cfg.haapi.enable then "6444" else "6443"}"
-          networking:
-            # dnsDomain: ${cfg.clusterName}.k8s.helsinki.tools
-            podSubnet: 10.224.0.0/11,fd08:4e1:1::/52
-            serviceSubnet: 10.96.0.0/12,fd08:4e1:2::/108
-          controllerManager:
-            extraArgs:
-              - name: node-cidr-mask-size-ipv4
-                value: "21"
-              - name: node-cidr-mask-size-ipv6
-                value: "62"
-          apiServer:
-            extraArgs:
-          ${lib.optionalString (cfg.elmaAudience != null) ''
-            #
-              - name: authentication-config
-                value: /oidc.yaml
-              - name: authorization-mode
-                value: Node,RBAC
-          ''}
-          ${lib.optionalString (cfg.encryptionProviderConfig != null) ''
-            #
-              - name: feature-gates
-                value: StructuredAuthenticationConfiguration=true
-              - name: encryption-provider-config
-                value: /encryption-provider.yaml
-          ''}
-            extraVolumes:
-          ${lib.optionalString (cfg.elmaAudience != null) ''
-            #
-              - hostPath: /etc/kubernetes/oidc.yaml
-                mountPath: /oidc.yaml
-                name: oidc-config
-                pathType: File
-                readOnly: true
-          ''}
-          ${lib.optionalString (cfg.encryptionProviderConfig != null) ''
-            #
-              - hostPath: ${cfg.encryptionProviderConfig}
-                mountPath: /encryption-provider.yaml
-                name: encryption-config
-                pathType: File
-                readOnly: true
-          ''}
-            certSANs: [ "127.0.0.1", "::1", "api.${cfg.clusterName}.k8s.helsinki.tools"${
-              lib.concatMapStringsSep "" (ip: ", \"${ip}\"") cfg.role.controlPlane.hosts
-            } ]
-          proxy:
-            disabled: true
-          ---
-          apiVersion: kubelet.config.k8s.io/v1beta1
-          kind: KubeletConfiguration
-          serverTLSBootstrap: true
-        '';
       };
     };
 
@@ -736,8 +737,8 @@ in
       script = ''
         set -eEuo pipefail
 
-        _config="$RUNTIME_DIRECTORY/kubeadm-cp-init.yaml"
-        cp /etc/kubernetes/kubeadm-cp-init.yaml "$_config"
+        _config="/etc/kubernetes/kubeadm-config.yaml"
+        cp ${kubeadmConfig} "$_config"
 
         cat >> "$_config" <<-EOF
         ---
@@ -783,48 +784,52 @@ in
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
+      script = ''
+        set -eEuo pipefail
+
+        if [[ -f "/etc/kubernetes/.kubeadm-init-done" ]] ; then
+          echo "Not re-running 'kubeadm init'"
+          exit 0
+        fi
+
+        _config="/etc/kubernetes/kubeadm-config.yaml"
+        cp ${kubeadmConfig} "$_config"
+
+        ${lib.optionalString (cfg.network.internal.interface != null) ''
+          _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
+
+          echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
+
+          yq --inplace \
+             '   with(select(.kind == "InitConfiguration");
+                   .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
+                 | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])
+               | with(select(.kind == "ClusterConfiguration");
+                   .apiServer.certSANs = .apiServer.certSANs + [ "'"$_interface_ip"'" ]
+                 | .controlPlaneEndpoint = "'"$_interface_ip"':6443" )' \
+             "$_config"
+        ''}
+
+        kubeadm init \
+          --config "$_config" \
+          --ignore-preflight-errors=all \
+          --upload-certs
+
+        while ! mapfile -d ' ' _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" < 3 ]] ; do
+          echo "waiting for 3 CSRs, so far have ''${#_csrs[@]}"
+          sleep 5
+        done
+        for _csr in "''${_csrs[@]}" ; do
+          kubectl certificate approve $_csr
+        done
+
+        touch /etc/kubernetes/.kubeadm-init-done
+
+        kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+      '';
+
       serviceConfig = {
         RuntimeDirectory = "kubeadm-init";
-        ExecStart = [
-          (pkgs.writeShellScript "kubeadm-init.sh" ''
-            set -eEuo pipefail
-
-            _config="$RUNTIME_DIRECTORY/kubeadm-cp-init.yaml"
-            cp /etc/kubernetes/kubeadm-cp-init.yaml "$_config"
-
-            ${lib.optionalString (cfg.network.internal.interface != null) ''
-              _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
-
-              echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
-
-              yq --inplace \
-                 '   with(select(.kind == "InitConfiguration");
-                       .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
-                     | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])
-                   | with(select(.kind == "ClusterConfiguration");
-                       .apiServer.certSANs = .apiServer.certSANs + [ "'"$_interface_ip"'" ]
-                     | .controlPlaneEndpoint = "'"$_interface_ip"':6443" )' \
-                 "$_config"
-            ''}
-
-            kubeadm init \
-              --config "$_config" \
-              --ignore-preflight-errors=all \
-              --upload-certs
-          '')
-          (pkgs.writeShellScript "kubeadm-approve-all-certs.sh" ''
-            set -eEuo pipefail
-
-            while ! mapfile -d ' ' _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" < 3 ]] ; do
-              echo "waiting for 3 CSRs, so far have ''${#_csrs[@]}"
-              sleep 5
-            done
-            for _csr in "''${_csrs[@]}" ; do
-              kubectl certificate approve $_csr
-            done
-          '')
-          "${lib.getExe' config.services.kubernetes.package "kubectl"} taint nodes --all node-role.kubernetes.io/control-plane-"
-        ];
         Type = "oneshot";
         RemainAfterExit = "yes";
       };

@@ -89,6 +89,10 @@ in
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/var/lib/containerd"
+      "/etc/kubernetes"
+      "/var/lib/cni"
+      "/var/lib/kubelet"
+      "/var/lib/etcd"
       "/opt/cni"
     ];
     files = [

@@ -159,9 +159,15 @@ in
       path = [
         inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}."cilium-cli"
         pkgs.yq-go
+        config.services.kubernetes.package
       ];
 
       script = ''
+        if kubectl get configmaps -n kube-system cilium-config >/dev/null 2>&1 ; then
+          echo "Cilium appears to be installed already"
+          exit 0
+        fi
+
         _config_file="$RUNTIME_DIRECTORY/values.yaml"
 
         cp --no-preserve=all ${

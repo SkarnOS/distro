@@ -1,28 +1,28 @@
-hostName = "control-plane"
+hostName = "worker-2"
 authorizedKeys = [
   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFVkFvalffJ/SMjJGG3WPiqCqFygnWzhGUaeALBIoCsJ cardno:23_148_290"
 ]
 boot = "efi"
 
 [deployment]
-address = "46.225.81.59"
-
+address = "168.119.164.211"
 
 [networking]
-nodeIp = "10.100.6.2"
+nodeIp = "10.100.6.1"
 nodeNetworkCidr = "10.100.0.0/16"
 [networking.uplink]
-macAddress = "92:00:07:44:f5:5d"
+macAddress = "92:00:07:4a:13:3e"
+
 [networking.uplink.address]
-static = [ "2a01:4f8:1c19:2251::2/64" ]
+static = [ "2a01:4f8:1c1a:8655::2/64" ]
 dhcp = "ipv4"
 
-
 [networking.internal]
-macAddress = "86:00:00:76:6d:d0"
+macAddress = "86:00:00:75:63:e9"
 
 [networking.internal.address]
 dhcp = true
 
-[role.controlPlane]
+
+[role.worker]
 enable = true

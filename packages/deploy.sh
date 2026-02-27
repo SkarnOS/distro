@@ -58,8 +58,21 @@ _store_path="$(nix build --print-out-paths --expr '
 '"''"').config.system.build.toplevel
 ')"
 
-nixos-rebuild "$_action" --target-host "root@$_ip_address" --store-path "$_store_path" --show-trace --no-reexec
+if [[ "$_action" == "install" ]] ; then
+    _disko_script="$(nix build --print-out-paths --expr '
+      let
+        flake = builtins.getFlake "path://'"$_flake_path"'?narHash='"$_flake_hash"'";
+      in
+        (flake.lib.fromTOML '"''"'
+    '"$(cat "$_host")"'
+    '"''"').config.system.build.diskoScript
+    ')"
 
-if [ "$_reboot" = "1" ] ; then
-    echo ssh "root@$_ip_address" reboot
+    nix run "github:nix-community/nixos-anywhere" -- --target-host "root@$_ip_address" --store-paths "$_disko_script" "$_store_path"
+else
+    nixos-rebuild "$_action" --target-host "root@$_ip_address" --store-path "$_store_path" --show-trace --no-reexec
+
+    if [ "$_reboot" = "1" ] ; then
+        ssh "root@$_ip_address" reboot
+    fi
 fi
