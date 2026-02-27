@@ -30,5 +30,30 @@
         "aarch64-darwin"
         "x86_64-darwin"
       ];
+
+      flake.lib.fromTOML =
+        tomlFile:
+        inputs."nixpkgs".lib.nixosSystem {
+          system = "x86_64-linux";
+
+          modules = [
+            (
+              { lib, ... }:
+              {
+                imports = [
+                  inputs."self".nixosModules."aio"
+                  inputs."srvos".nixosModules."hardware-hetzner-cloud"
+                ];
+
+                rename-me.settings = lib.mkMerge [
+                  {
+                    enable = true;
+                  }
+                  (builtins.fromTOML tomlFile)
+                ];
+              }
+            )
+          ];
+        };
     };
 }

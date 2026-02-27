@@ -1,0 +1,28 @@
+hostName = "worker-1"
+authorizedKeys = [
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFVkFvalffJ/SMjJGG3WPiqCqFygnWzhGUaeALBIoCsJ cardno:23_148_290"
+]
+boot = "efi"
+
+[deployment]
+address = "46.225.236.137"
+
+
+[networking]
+nodeIp = "10.100.6.1"
+nodeNetworkCidr = "10.100.0.0/16"
+[networking.uplink]
+macAddress = "92:00:07:45:a4:b1"
+[networking.uplink.address]
+static = [ "2a01:4f8:1c19:2e2c::2/64" ]
+dhcp = "ipv4"
+
+
+[networking.internal]
+macAddress = "86:00:00:76:6d:ca"
+
+[networking.internal.address]
+dhcp = true
+
+[role.worker]
+enable = true

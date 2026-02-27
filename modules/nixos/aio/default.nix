@@ -37,6 +37,12 @@ in
       ];
     };
 
+    deployment = {
+      address = lib.mkOption {
+        type = lib.types.str;
+      };
+    };
+
     networking = {
       nodeIp = lib.mkOption {
         type = lib.types.str;
