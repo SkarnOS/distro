@@ -723,10 +723,11 @@ in
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
+      unitConfig.ConditionPathExists = "/var/lib/kubeadm-join/secret.env";
+
       serviceConfig = {
         RuntimeDirectory = "kubeadm-join";
         StateDirectory = "kubeadm-join";
-        ConditionPathExists = "/var/lib/kubeadm-join/secret.env";
         EnvironmentFile = "/var/lib/kubeadm-join/secret.env";
         Type = "oneshot";
         RemainAfterExit = "yes";
@@ -735,24 +736,35 @@ in
       script = ''
         set -eEuo pipefail
 
-        ${lib.optionalString (cfg.network.internal.interface != null) ''
-          _kubelet_patch="$RUNTIME_DIRECTORY/kubeletconfiguratio0+strategic.yaml"
-          touch "$_kubelet_patch"
+        _config="$RUNTIME_DIRECTORY/kubeadm-cp-init.yaml"
+        cp /etc/kubernetes/kubeadm-cp-init.yaml "$_config"
 
+        cat >> "$_config" <<-EOF
+        ---
+        apiVersion: kubeadm.k8s.io/v1beta4
+        kind: JoinConfiguration
+        discovery:
+          tlsBootstrapToken: "$_join_token"
+          bootstrapToken:
+            token: "$_join_token"
+            apiServerEndpoint: "$_control_plane_address:6443"
+            caCertHashes: [ "$_discovery_token_ca_cert_hash" ]
+        EOF
+
+        ${lib.optionalString (cfg.network.internal.interface != null) ''
           _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
 
-          echo "Using $_interface_ip as 'node-ip'"
+          echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
 
           yq --inplace \
-             '.nodeIp = "'"$_interface_ip"'"' \
-             "$_kubelet_patch"
+             '   with(select(.kind == "JoinConfiguration");
+                   .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
+                 | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])' \
+             "$_config"
         ''}
 
-        kubeadm join \
-          "$_control_plane_address:6443" \
-          --patches "$RUNTIME_DIRECTORY" \
-          --token "$_join_token" \
-          --discovery-token-ca-cert-hash "$_discovery_token_ca_cert_hash"
+        cat "$_config"
+        kubeadm join --config "$_config"
       '';
     };
 
