@@ -27,8 +27,8 @@ _control_plane_address="$(_ssh "$_control_plane" fish-out-netif-ip kube-int)"
 
 _ssh "$_worker" "mkdir -p /var/lib/kubeadm-join ; umask 0077 ; touch /var/lib/kubeadm-join/secret.env"
 _ssh "$_worker" "cat > /var/lib/kubeadm-join/secret.env" <<EOF
-_control_plane_address="$_control_plane_address"
-_join_token="$_token"
-_discovery_token_ca_cert_hash="sha256:$_cert_digest"
+CONTROL_PLANE_ADDRESS="$_control_plane_address"
+JOIN_TOKEN="$_token"
+DISCOVERY_TOKEN_CA_CERT_HASH="sha256:$_cert_digest"
 EOF
 _ssh "$_worker" "systemctl restart kubernetes-full.target"

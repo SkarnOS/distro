@@ -750,11 +750,11 @@ in
         apiVersion: kubeadm.k8s.io/v1beta4
         kind: JoinConfiguration
         discovery:
-          tlsBootstrapToken: "$_join_token"
+          tlsBootstrapToken: "$JOIN_TOKEN"
           bootstrapToken:
-            token: "$_join_token"
-            apiServerEndpoint: "$_control_plane_address:6443"
-            caCertHashes: [ "$_discovery_token_ca_cert_hash" ]
+            token: "$JOIN_TOKEN"
+            apiServerEndpoint: "$CONTROL_PLANE_ADDRESS:6443"
+            caCertHashes: [ "$DISCOVERY_TOKEN_CA_CERT_HASH" ]
         EOF
 
         ${lib.optionalString (cfg.network.internal.interface != null) ''
