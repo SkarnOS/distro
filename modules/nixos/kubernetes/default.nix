@@ -815,12 +815,12 @@ in
           --ignore-preflight-errors=all \
           --upload-certs
 
-        while ! mapfile -d ' ' _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" < 3 ]] ; do
+        while ! mapfile -d ' ' _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" -lt 3 ]] ; do
           echo "waiting for 3 CSRs, so far have ''${#_csrs[@]}"
           sleep 5
         done
         for _csr in "''${_csrs[@]}" ; do
-          kubectl certificate approve $_csr
+          kubectl certificate approve "$_csr"
         done
 
         touch /etc/kubernetes/.kubeadm-init-done
