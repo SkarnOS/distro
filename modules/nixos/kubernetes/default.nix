@@ -820,7 +820,7 @@ in
           --ignore-preflight-errors=all \
           --upload-certs
 
-        while ! mapfile -d ' ' _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" -lt 3 ]] ; do
+        while ! mapfile -d ' ' -t _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" -lt 3 ]] ; do
           echo "waiting for 3 CSRs, so far have ''${#_csrs[@]}"
           sleep 5
         done
