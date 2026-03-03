@@ -114,6 +114,7 @@ in
       firewall = {
         logRefusedPackets = true;
         trustedInterfaces = [
+          # only works on iptables, not nftables
           "lxc+"
           "kube-int"
         ];
@@ -147,10 +148,6 @@ in
 
     services.kubernetes.package =
       inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.kubernetes."1_35";
-
-    services.resolved.settings.Resolve = {
-      DNSStubListenerExtra = cfg.networking.nodeIp;
-    };
 
     rename-me.kubernetes = {
       enable = true;
