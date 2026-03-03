@@ -41,8 +41,8 @@ let
     controlPlaneEndpoint: "127.0.0.1:${if cfg.haapi.enable then "6444" else "6443"}"
     networking:
       # dnsDomain: ${cfg.clusterName}.k8s.helsinki.tools
-      podSubnet: 10.224.0.0/11,fd08:4e1:1::/52
-      serviceSubnet: 10.96.0.0/12,fd08:4e1:2::/108
+      podSubnet: ${cfg.network.podSubnet},fd08:4e1:1::/52
+      serviceSubnet: ${cfg.network.serviceSubnet},fd08:4e1:2::/108
     controllerManager:
       extraArgs:
         - name: node-cidr-mask-size-ipv4
@@ -137,6 +137,20 @@ in
     };
 
     network = {
+      podSubnet = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+          CIDR range where pods will live.
+        '';
+      };
+
+      serviceSubnet = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+          CIDR range where services will live.
+        '';
+      };
+
       cni = lib.mkOption {
         description = "Name of the CNI the host will be prepared for. Note that cilium has to be used in kube-proxy replacement mode. There is no IPv6 for Flannel";
         type = lib.types.attrTag {
@@ -154,12 +168,11 @@ in
         default = lib.take 3 config.networking.nameservers;
       };
 
-      dontConfigureNetworkd = lib.mkOption {
-        description = "Support for legacy clusters that do their own networkd configuration";
-        type = lib.types.bool;
-        default = false;
-        example = true;
-      };
+      dontConfigureNetworkd =
+        lib.mkEnableOption "Support for legacy clusters that do their own networkd configuration"
+        // {
+          default = false;
+        };
 
       internal = {
         interface = lib.mkOption {
