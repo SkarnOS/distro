@@ -154,8 +154,6 @@ in
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
-      # _interface_ip=$(${callPackage ./fish-out-netif-ip.nix { }} ${cfg.network.internal.interface})
-
       path = [
         inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}."cilium-cli"
         pkgs.yq-go
@@ -163,11 +161,6 @@ in
       ];
 
       script = ''
-        if kubectl get configmaps -n kube-system cilium-config >/dev/null 2>&1 ; then
-          echo "Cilium appears to be installed already"
-          exit 0
-        fi
-
         _config_file="$RUNTIME_DIRECTORY/values.yaml"
 
         cp --no-preserve=all ${
@@ -184,7 +177,13 @@ in
            '.k8s.apiServerURLs = ( [ "'"$_interface_ip"':6443" ] | join(" ") )' \
            "$_config_file"
 
-        cilium install --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
+        if kubectl get configmaps -n kube-system cilium-config >/dev/null 2>&1 ; then
+          echo "Cilium looks to be installed already, upgrading to the same version, with new config"
+          cilium upgrade --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
+        else
+          echo "Performing a fresh Cilium install"
+          cilium install --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
+        fi
         cilium status --wait
       '';
 
