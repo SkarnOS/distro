@@ -209,7 +209,12 @@ in
 
         if kubectl get configmaps -n kube-system cilium-config >/dev/null 2>&1 ; then
           echo "Cilium looks to be installed already, upgrading to the same version, with new config"
-          cilium upgrade --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
+          echo "not doing that, broken as fuck"
+          exit 0
+          # cilium upgrade \
+          #   --reset-values \
+          #   --version ${config.services.kubernetes.package.passthru.cilium_image_version} \
+          #   --values "$_config_file"
         else
           echo "Performing a fresh Cilium install"
           cilium install --version ${config.services.kubernetes.package.passthru.cilium_image_version} --values "$_config_file"
