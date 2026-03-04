@@ -23,12 +23,35 @@ in
               default = inputs.self.legacyPackages.${pkgs.hostPlatform.system}.cilium-cli;
             };
 
-            localIpv4 = lib.mkOption {
-              type = lib.types.str;
-            };
+            routingMode = lib.mkOption {
+              type = lib.types.attrTag {
+                native = lib.mkOption {
+                  type = lib.types.submodule {
+                    options = {
+                      localIpv4 = lib.mkOption {
+                        type = lib.types.str;
+                      };
 
-            ipv4NativeRoutingCIDR = lib.mkOption {
-              type = lib.types.str;
+                      ipv4NativeRoutingCIDR = lib.mkOption {
+                        type = lib.types.str;
+                      };
+                    };
+                  };
+                };
+
+                tunnel = lib.mkOption {
+                  type = lib.types.submodule {
+                    options = {
+                      protocol = lib.mkOption {
+                        type = lib.types.enum [
+                          "geneve"
+                          "vxlan"
+                        ];
+                      };
+                    };
+                  };
+                };
+              };
             };
 
             values = lib.mkOption {
@@ -64,14 +87,21 @@ in
               authentication.mutual.spire.install.agent.image.useDigest = false;
               authentication.mutual.spire.install.server.image.useDigest = false;
               standaloneDnsProxy.image.useDigest = false;
-              # added so i can hardcode the address
-              extraArgs = [ "--local-router-ipv4=${cfg.localIpv4}" ];
-              routingMode = "native";
               endpointRoutes.enabled = true;
               debug.enabled = true;
-              # not needed for now
-              inherit (cfg) ipv4NativeRoutingCIDR;
-            };
+              extraConfig = {
+                cluster-name = cfgK8s.clusterName;
+              };
+            }
+            // (lib.optionalAttrs (cfg.routingMode ? native) {
+              routingMode = "native";
+              inherit (cfg.routingMode.native) ipv4NativeRoutingCIDR;
+              extraArgs = [ "--local-router-ipv4=${cfg.localIpv4}" ];
+            })
+            // (lib.optionalAttrs (cfg.routingMode ? tunnel) {
+              routingMode = "tunnel";
+              tunnelProtocol = cfg.routingMode.tunnel.protocol;
+            });
           };
         };
         default = { };

@@ -833,10 +833,13 @@ in
           --ignore-preflight-errors=all \
           --upload-certs
 
-        while ! mapfile -d ' ' -t _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || [[ "''${#_csrs[@]}" -lt 3 ]] ; do
-          echo "waiting for 3 CSRs, so far have ''${#_csrs[@]}"
-          sleep 5
+        _prev_csr_count=0
+        while ! mapfile -d ' ' -t _csrs < <(kubectl get csr -o jsonpath='{.items[*].metadata.name}') || ! [[ "''${#_csrs[@]}" = "$_prev_csr_count" ]] ; do
+          echo "waiting for CSR count to stabilize, had $_prev_csr_count, now we have ''${#_csrs[@]}, waiting 10 seconds"
+          _prev_csr_count="''${#_csrs[@]}"
+          sleep 10
         done
+        echo "CSR count stabilized at ''${#_csrs[@]}"
         for _csr in "''${_csrs[@]}" ; do
           kubectl certificate approve "$_csr"
         done
