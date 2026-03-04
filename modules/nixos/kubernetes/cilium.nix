@@ -29,7 +29,8 @@ in
                   type = lib.types.submodule {
                     options = {
                       localIpv4 = lib.mkOption {
-                        type = lib.types.str;
+                        type = lib.types.nullOr lib.types.str;
+                        default = null;
                       };
 
                       ipv4NativeRoutingCIDR = lib.mkOption {
@@ -96,7 +97,9 @@ in
             // (lib.optionalAttrs (cfg.routingMode ? native) {
               routingMode = "native";
               inherit (cfg.routingMode.native) ipv4NativeRoutingCIDR;
-              extraArgs = [ "--local-router-ipv4=${cfg.localIpv4}" ];
+              extraArgs = lib.optional (
+                cfg.routingMode.native.localIpv4 != null
+              ) "--local-router-ipv4=${cfg.routingMode.native.localIpv4}";
             })
             // (lib.optionalAttrs (cfg.routingMode ? tunnel) {
               routingMode = "tunnel";
