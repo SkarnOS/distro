@@ -221,6 +221,14 @@ in
           default = [ ];
           example = [ "192.168.1.2" ];
         };
+
+        sudoPreserveKubeconfig = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = ''
+            Whether to preserve the `KUBECONFIG` environment variable through sudo.
+          '';
+        };
       };
 
       worker = {
@@ -247,6 +255,19 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    security =
+      let
+        extraConfig = ''
+
+          # Keep kube configuration location for root and %wheel.
+          Defaults:root,%wheel env_keep+=KUBECONFIG
+        '';
+      in
+      lib.mkIf cfg.role.controlPlane.sudoPreserveKubeconfig {
+        sudo = { inherit extraConfig; };
+        sudo-rs = { inherit extraConfig; };
+      };
+
     boot = {
       kernel.sysctl = {
         # Module system foo, we set this to 1 twice
