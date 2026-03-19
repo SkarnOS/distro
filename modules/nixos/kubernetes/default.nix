@@ -99,6 +99,7 @@ in
     (lib.modules.importApply ./cilium.nix { inherit inputs; })
     ./flannel.nix
     ./firewall.nix
+    ./openebs.nix
   ];
 
   options.rename-me.kubernetes = {
