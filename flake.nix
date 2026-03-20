@@ -10,6 +10,9 @@
     srvos.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    nix-snapshotter.url = "github:pdtpartners/nix-snapshotter";
+    nix-snapshotter.inputs.nixpkgs.follows = "nixpkgs";
+    nix-snapshotter.inputs.flake-parts.follows = "flake-parts";
   };
 
   outputs =

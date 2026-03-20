@@ -100,6 +100,7 @@ in
     ./flannel.nix
     ./firewall.nix
     ./openebs.nix
+    (lib.modules.importApply ./nix-snapshotter.nix { inherit inputs; })
   ];
 
   options.rename-me.kubernetes = {
@@ -236,8 +237,6 @@ in
         enable = lib.mkEnableOption "a kubeadm-manager Kubernetes worker node";
       };
     };
-
-    openebs.enable = lib.mkEnableOption "OpenEBS integration";
 
     ceph.enable = (lib.mkEnableOption "Rook-Ceph integration") // {
       default = true;
@@ -747,7 +746,7 @@ in
     # containerd defaults to the ZFS snapshotter, that's no longer needed as ZFS works
     # with overlayfs since semi-recently
     virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.snapshotter =
-      "overlayfs";
+      lib.mkOverride 99 "overlayfs";
 
     systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
       requiredBy = [ "kubernetes-full.target" ];
