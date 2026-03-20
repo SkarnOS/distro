@@ -20,6 +20,8 @@ in
   config = lib.mkIf (cfgK8s.enable && cfg.enable) {
     nixpkgs.overlays = [ inputs.nix-snapshotter.overlays.default ];
 
+    services.kubernetes.kubelet.extraOpts = "--image-service-endpoint unix:///run/nix-snapshotter/nix-snapshotter.sock";
+
     virtualisation.containerd.nixSnapshotterIntegration = true;
     services.nix-snapshotter.enable = true;
   };
