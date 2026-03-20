@@ -746,7 +746,7 @@ in
     # containerd defaults to the ZFS snapshotter, that's no longer needed as ZFS works
     # with overlayfs since semi-recently
     virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.snapshotter =
-      lib.mkOverride 99 "overlayfs";
+      lib.mkOverride 101 "overlayfs";
 
     systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
       requiredBy = [ "kubernetes-full.target" ];
