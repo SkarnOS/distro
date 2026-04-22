@@ -122,7 +122,7 @@ testers.nixosTest {
 
         networking.firewall.enable = false;
 
-        rename-me.kubernetes = {
+        skarnos.kubernetes = {
           enable = true;
           network = {
             cni."cilium" = {

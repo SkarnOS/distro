@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  cfgK8s = config.rename-me.kubernetes;
+  cfgK8s = config.skarnos.kubernetes;
   cfg =
     if cfgK8s.network.cni ? "flannel" then
       { enable = true; } // cfgK8s.network.cni.flannel

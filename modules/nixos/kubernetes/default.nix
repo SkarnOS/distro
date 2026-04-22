@@ -9,7 +9,7 @@
 }:
 
 let
-  cfg = config.rename-me.kubernetes;
+  cfg = config.skarnos.kubernetes;
   internalInterfaceName =
     (if cfg.network.internal.interface == null then "dummy0" else cfg.network.internal.interface)
     + lib.optionalString (
@@ -103,7 +103,7 @@ in
     (lib.modules.importApply ./nix-snapshotter.nix { inherit inputs; })
   ];
 
-  options.rename-me.kubernetes = {
+  options.skarnos.kubernetes = {
     enable = lib.mkEnableOption "a kubeadm-managed Kubernetes node";
 
     upgradePackage = lib.mkOption {

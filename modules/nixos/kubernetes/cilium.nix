@@ -6,7 +6,7 @@
   ...
 }:
 let
-  cfgK8s = config.rename-me.kubernetes;
+  cfgK8s = config.skarnos.kubernetes;
   cfg =
     if cfgK8s.network.cni ? "cilium" then
       { enable = true; } // cfgK8s.network.cni.cilium
@@ -14,7 +14,7 @@ let
       { enable = false; };
 in
 {
-  options.rename-me.kubernetes.network.cni = lib.mkOption {
+  options.skarnos.kubernetes.network.cni = lib.mkOption {
     type = lib.types.attrTag {
       "cilium" = lib.mkOption {
         type = lib.types.submodule {
@@ -113,7 +113,7 @@ in
   };
 
   config = lib.mkIf (cfgK8s.enable && cfg.enable) {
-    rename-me.kubernetes.network.internal.extraNetworkdConfig =
+    skarnos.kubernetes.network.internal.extraNetworkdConfig =
       lib.mkIf (cfgK8s.network.internal.interface == null)
         {
           address = [

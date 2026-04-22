@@ -4,7 +4,7 @@
   ...
 }:
 {
-  options.rename-me.kubernetes.openebs = {
+  options.skarnos.kubernetes.openebs = {
     enable = lib.mkEnableOption "Enable OpenEBS";
   };
 
