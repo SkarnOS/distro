@@ -106,6 +106,10 @@ in
   options.skarnos.kubernetes = {
     enable = lib.mkEnableOption "a kubeadm-managed Kubernetes node";
 
+    package = lib.mkPackageOption pkgs "kubernetes" { } // {
+      default = throw "You must select a Kubernetes version from the supported versions provided by SkarnOS.";
+    };
+
     upgradePackage = lib.mkOption {
       description = "A Kubernetes package from which `kubeadm` will be installed into PATH as `upgrade-kubeadm`";
       type = lib.types.nullOr lib.types.package;
@@ -328,6 +332,7 @@ in
 
     services = {
       kubernetes = {
+        package = cfg.package;
         roles = [ "node" ]; # we use a stacked control plane by default
         apiserverAddress = ""; # We set this using `kubeadm init`
         dataDir = "/var/lib/kubelet";
