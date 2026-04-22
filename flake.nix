@@ -26,6 +26,7 @@
         ./checks
         ./modules/nixos
         ./systems/nixos
+        ./template.nix
       ];
       systems = [
         "x86_64-linux"
