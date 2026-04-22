@@ -1,4 +1,9 @@
-{ lib, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   cfgK8s = config.skarnos.kubernetes;
   cfg =
@@ -23,5 +28,24 @@ in
       "xt_statistic"
       "xt_tcpudp"
     ];
+
+    systemd.services."kube-flannel-install" = lib.mkIf cfgK8s.role.controlPlane.enable {
+      requiredBy = [ "kubernetes-full.target" ];
+      requires = [ "kubeadm-init.service" ];
+      after = [ "kubeadm-init.service" ];
+
+      environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
+
+      path = [
+        pkgs.curl
+        config.services.kubernetes.package
+      ];
+
+      script = ''
+        curl -L https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml \
+          | sed 's~10.244.0.0/16~${cfgK8s.network.podSubnet}~' \
+          | kubectl apply -f -
+      '';
+    };
   };
 }
