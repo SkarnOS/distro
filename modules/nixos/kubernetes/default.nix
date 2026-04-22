@@ -355,7 +355,7 @@ in
                 )
               }"
             ])
-            + " \${KUBELET_KUBEADM_ARGS}";
+            + " $KUBELET_KUBEADM_ARGS";
         };
         # Features we don't need on a stacked control plane
         proxy.enable = false;
