@@ -185,7 +185,14 @@ in
 
       nameservers = lib.mkOption {
         type = lib.types.listOf lib.types.str;
-        default = lib.take 3 config.networking.nameservers;
+        default =
+          if config.networking.nameservers != [ ] then
+            lib.take 3 config.networking.nameservers
+          else
+            [
+              "8.8.8.8"
+              "8.8.4.4"
+            ];
       };
 
       dontConfigureNetworkd =
