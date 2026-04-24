@@ -774,65 +774,67 @@ in
     virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.snapshotter =
       lib.mkOverride 101 "overlayfs";
 
-    systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
-      requiredBy = [ "kubernetes-full.target" ];
-      before = [ "kubernetes-full.target" ];
+    systemd.services."kubeadm-join" =
+      lib.mkIf (cfg.role.worker.enable && !cfg.role.controlPlane.enable)
+        {
+          requiredBy = [ "kubernetes-full.target" ];
+          before = [ "kubernetes-full.target" ];
 
-      path = [
-        config.services.kubernetes.package
-        pkgs.util-linux
-        pkgs.yq-go
-        pkgs.jq
-        pkgs.iproute2
-        fishOutNetifIp
-      ];
+          path = [
+            config.services.kubernetes.package
+            pkgs.util-linux
+            pkgs.yq-go
+            pkgs.jq
+            pkgs.iproute2
+            fishOutNetifIp
+          ];
 
-      environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
+          environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
-      unitConfig.ConditionPathExists = "/var/lib/kubeadm-join/secret.env";
+          unitConfig.ConditionPathExists = "/var/lib/kubeadm-join/secret.env";
 
-      serviceConfig = {
-        RuntimeDirectory = "kubeadm-join";
-        StateDirectory = "kubeadm-join";
-        EnvironmentFile = "/var/lib/kubeadm-join/secret.env";
-        Type = "oneshot";
-        RemainAfterExit = "yes";
-      };
+          serviceConfig = {
+            RuntimeDirectory = "kubeadm-join";
+            StateDirectory = "kubeadm-join";
+            EnvironmentFile = "/var/lib/kubeadm-join/secret.env";
+            Type = "oneshot";
+            RemainAfterExit = "yes";
+          };
 
-      script = ''
-        set -eEuo pipefail
+          script = ''
+            set -eEuo pipefail
 
-        _config="/etc/kubernetes/kubeadm-config.yaml"
-        cp ${kubeadmConfig} "$_config"
+            _config="/etc/kubernetes/kubeadm-config.yaml"
+            cp ${kubeadmConfig} "$_config"
 
-        cat >> "$_config" <<-EOF
-        ---
-        apiVersion: kubeadm.k8s.io/v1beta4
-        kind: JoinConfiguration
-        discovery:
-          tlsBootstrapToken: "$JOIN_TOKEN"
-          bootstrapToken:
-            token: "$JOIN_TOKEN"
-            apiServerEndpoint: "$CONTROL_PLANE_ADDRESS:6443"
-            caCertHashes: [ "$DISCOVERY_TOKEN_CA_CERT_HASH" ]
-        EOF
+            cat >> "$_config" <<-EOF
+            ---
+            apiVersion: kubeadm.k8s.io/v1beta4
+            kind: JoinConfiguration
+            discovery:
+              tlsBootstrapToken: "$JOIN_TOKEN"
+              bootstrapToken:
+                token: "$JOIN_TOKEN"
+                apiServerEndpoint: "$CONTROL_PLANE_ADDRESS:6443"
+                caCertHashes: [ "$DISCOVERY_TOKEN_CA_CERT_HASH" ]
+            EOF
 
-        ${lib.optionalString (cfg.network.internal.interface != null) ''
-          _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
+            ${lib.optionalString (cfg.network.internal.interface != null) ''
+              _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
 
-          echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
+              echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
 
-          yq --inplace \
-             '   with(select(.kind == "JoinConfiguration");
-                   .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
-                 | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])' \
-             "$_config"
-        ''}
+              yq --inplace \
+                 '   with(select(.kind == "JoinConfiguration");
+                       .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
+                     | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])' \
+                 "$_config"
+            ''}
 
-        cat "$_config"
-        kubeadm join --config "$_config"
-      '';
-    };
+            cat "$_config"
+            kubeadm join --config "$_config"
+          '';
+        };
 
     systemd.services."kubeadm-init" = lib.mkIf cfg.role.controlPlane.enable {
       requiredBy = [ "kubernetes-full.target" ];
@@ -893,7 +895,9 @@ in
 
         touch /etc/kubernetes/.kubeadm-init-done
 
-        kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+        ${lib.optionalString cfg.role.worker.enable ''
+          kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+        ''}
       '';
 
       serviceConfig = {
