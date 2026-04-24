@@ -200,11 +200,11 @@
         ]
       },
       "locked": {
-        "path": "../..",
+        "path": "..",
         "type": "path"
       },
       "original": {
-        "path": "../..",
+        "path": "..",
         "type": "path"
       },
       "parent": []

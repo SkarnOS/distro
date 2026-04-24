@@ -7,6 +7,22 @@ Each node's configuration directory (`./hosts/<node-name>`) contains:
 - `./disko.nix` - partitioning information for fully automated installs
 - `./configuration.nix` - core configuration, which ties everything together
 
+## Development Shell
+
+This example also includes a development shell which includes a few useful utilities, you can enter this shell by issuing the following command:
+
+```bash
+nix develop
+```
+
+## Using This Example as a Template
+
+To create a new flake based on this example, issue the following command in a empty directory:
+
+```bash
+nix flake init -t github:SkarnOS/distro#
+```
+
 # Deploying a Cluster
 
 You can deploy a cluster based on this example flake. This flake does make a few assumptions:
@@ -29,25 +45,24 @@ First things first, we need to install SkarnOS onto 2 servers, for which we'll u
 > These commands WILL erase everything on the targets you provide, you have been WARNED!
 
 ```bash
-nix run github:nix-community/nixos-anywhere -- --target-host "$(nix eval --raw .#nixosConfigurations.controller-1.config.skarnos.kubernetes.sshTarget)" --flake .#controller-1
-nix run github:nix-community/nixos-anywhere -- --target-host "$(nix eval --raw .#nixosConfigurations.worker-1.config.skarnos.kubernetes.sshTarget)" --flake .#worker-1
+skarnos install controller-1
+skarnos install worker-1
 ```
 
 After these two commands finish, you should be left with two SkarnOS servers, which do not yet form a cluster. To make that happen, run the following command:
 
 ```bash
-../../packages/something.sh controller-1 worker-1
+skarnos join controller-1 worker-1
 ```
 
 Now you should have a cluster, congratulations!
 
 ## Deploying to Your SkarnOS Servers
 
-To deploy to your new servers, you can use the following commands:
+To deploy to your new servers, you can use the following command:
 
 ```bash
-nixos-rebuild ACTION --target-host $(nix eval --raw .#nixosConfigurations.controller-1.config.skarnos.kubernetes.sshTarget) --flake .#controller-1
-nixos-rebuild ACTION --target-host $(nix eval --raw .#nixosConfigurations.worker-1.config.skarnos.kubernetes.sshTarget) --flake .#worker-1
+skarnos deploy ACTION controller-1 worker-1
 ```
 
 **`ACTION`** can be one of the following:
