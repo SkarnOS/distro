@@ -86,7 +86,9 @@ let
         lib.concatMapStringsSep "" (ip: ", \"${ip}\"") cfg.role.controlPlane.hosts
       } ]
     proxy:
-      disabled: true
+      disabled: ${if cfg.network.kubeProxy then "false" else "true"}
+    dns:
+      disabled: ${if cfg.network.coredns then "false" else "true"}
     ---
     apiVersion: kubelet.config.k8s.io/v1beta1
     kind: KubeletConfiguration
@@ -155,6 +157,14 @@ in
         description = ''
           CIDR range where services will live.
         '';
+      };
+
+      kubeProxy = lib.mkEnableOption "Whether to enable the `kube-proxy`." // {
+        default = true;
+      };
+
+      coredns = lib.mkEnableOption "Whether to enable `coredns`." // {
+        default = true;
       };
 
       cni = lib.mkOption {
