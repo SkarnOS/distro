@@ -21,6 +21,7 @@ containers = {
     "registry.k8s.io/kube-apiserver": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/kube-controller-manager": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/kube-scheduler": [SpecialVersion.KUBERNETES],
+    "registry.k8s.io/kube-proxy": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/pause": [SpecialVersion.PAUSE_VERSION],
     "quay.io/cilium/cilium": [SpecialVersion.CILIUM_VERSION],
     "quay.io/cilium/operator-generic": [SpecialVersion.CILIUM_VERSION],

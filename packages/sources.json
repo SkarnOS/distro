@@ -14,6 +14,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.35.4"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.35.4"
+            ],
             "registry.k8s.io/pause": [
                 "3.10.1"
             ],
@@ -73,6 +76,9 @@
                 "v1.34.7"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.34.7"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.34.7"
             ],
             "registry.k8s.io/pause": [
@@ -136,6 +142,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.33.11"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.33.11"
+            ],
             "registry.k8s.io/pause": [
                 "3.10"
             ],
@@ -195,6 +204,9 @@
                 "v1.32.13"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.32.13"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.32.13"
             ],
             "registry.k8s.io/pause": [
@@ -258,6 +270,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.31.14"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.31.14"
+            ],
             "registry.k8s.io/pause": [
                 "3.10"
             ],
@@ -317,6 +332,9 @@
                 "v1.30.14"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.30.14"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.30.14"
             ],
             "registry.k8s.io/pause": [
@@ -380,6 +398,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.29.15"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.29.15"
+            ],
             "registry.k8s.io/pause": [
                 "3.9"
             ],
@@ -439,6 +460,9 @@
                 "v1.28.15"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.28.15"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.28.15"
             ],
             "registry.k8s.io/pause": [
@@ -502,6 +526,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.27.16"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.27.16"
+            ],
             "registry.k8s.io/pause": [
                 "3.9"
             ],
@@ -561,6 +588,9 @@
                 "v1.26.15"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.26.15"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.26.15"
             ],
             "registry.k8s.io/pause": [
@@ -624,6 +654,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.25.16"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.25.16"
+            ],
             "registry.k8s.io/pause": [
                 "3.8"
             ],
@@ -683,6 +716,9 @@
                 "v1.24.17"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.24.17"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.24.17"
             ],
             "registry.k8s.io/pause": [
@@ -746,6 +782,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.23.17"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.23.17"
+            ],
             "registry.k8s.io/pause": [
                 "3.6"
             ],
@@ -805,6 +844,9 @@
                 "v1.22.17"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.22.17"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.22.17"
             ],
             "registry.k8s.io/pause": [
@@ -868,6 +910,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.21.14"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.21.14"
+            ],
             "registry.k8s.io/pause": [
                 "3.4.1"
             ],
@@ -927,6 +972,9 @@
                 "v1.20.15"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.20.15"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.20.15"
             ],
             "registry.k8s.io/pause": [
@@ -990,6 +1038,9 @@
             "registry.k8s.io/kube-scheduler": [
                 "v1.19.16"
             ],
+            "registry.k8s.io/kube-proxy": [
+                "v1.19.16"
+            ],
             "registry.k8s.io/pause": [
                 "3.2"
             ],
@@ -1049,6 +1100,9 @@
                 "v1.18.20"
             ],
             "registry.k8s.io/kube-scheduler": [
+                "v1.18.20"
+            ],
+            "registry.k8s.io/kube-proxy": [
                 "v1.18.20"
             ],
             "registry.k8s.io/pause": [
