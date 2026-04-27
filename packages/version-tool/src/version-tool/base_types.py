@@ -92,13 +92,14 @@ class SkopeoImageInfo(BaseModel):
     digest: str = Field(alias = "Digest")
 
 class CouldNotResolveImageVersion(Exception):
-    kubernetes_version: str
+    kubernetes_version: str | None
     image: str
     exception: Exception | None
 
-    def __init__(self, kubernetes_version: str, image: str, exception: Exception | None = None):
+    def __init__(self, image: str, kubernetes_version: str | None = None, exception: Exception | None = None):
         super().__init__(
-            f"Could not resolve version of image {image} for Kubernetes {kubernetes_version}"
+            f"Could not resolve version of image {image}"
+            + (" for Kubernetes {kubernetes_version}" if kubernetes_version is not None else "")
             + (("\n" + str(exception)) if exception is not None else "")
         )
 

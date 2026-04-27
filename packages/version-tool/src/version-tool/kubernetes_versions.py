@@ -91,8 +91,6 @@ async def get_cilium_image_version(tmpdir: str) -> str:
 
     except ProcessFailed as exception:
         raise CouldNotResolveImageVersion(
-            kubernetes_version = kubernetes_version,
-            image = image,
             exception = exception
         )
 
@@ -122,7 +120,7 @@ async def prefetch_kubernetes_version(tmpdir: str, release: Release):
             )
     except ProcessFailed as exception:
         raise CouldNotResolveImageVersion(
-            kubernetes_version = kubernetes_version,
+            kubernetes_version = release.latest.name,
             image = image,
             exception = exception
         )

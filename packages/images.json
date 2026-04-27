@@ -1,20 +1,20 @@
 {
     "registry.k8s.io/kube-apiserver": {
-        "v1.35.1": {
-            "hash": "sha256-VgObt16NtTJlb7S8r3YgyJwE/QSWuxeBcghX442hZqs=",
-            "digest": "sha256:011838b85f65454b95a013b2b902dd506789fd07f9abc84e52eb2b6a044cd392"
+        "v1.35.4": {
+            "hash": "sha256-TqY/amq4s5br+JJwTnB37hWM6zDkVSKZQA1yUKDiObg=",
+            "digest": "sha256:06b4bb208634a107ab9e6c50cdb9df178d05166a700c0cc448d59522091074b5"
         },
-        "v1.34.4": {
-            "hash": "sha256-Zz/fsHZ9LYDuDzmiquRW0QZU79sRGlfDwkwCB4BHb78=",
-            "digest": "sha256:f2b5a686d329b24ef4f4b057ddaf61e01874122d584e99c2a19d1e1714e4b7ae"
+        "v1.34.7": {
+            "hash": "sha256-yHh9qwKvWOS+eVuIA+BSAW12ZvAzc1o+o7QrOK/hsu0=",
+            "digest": "sha256:b96b8464d152a24c81d7f0435fd2198f8486970cd26a9e0e9c20826c73d1441c"
         },
-        "v1.33.8": {
-            "hash": "sha256-H+r/WMSPM/3xm97rqlC3eboLliV2PmoMJ9nUDN+6pk0=",
-            "digest": "sha256:0d1f1afdd389ba0b99233830af563d7da79484b8bae6ff905d6edbcb419127bd"
+        "v1.33.11": {
+            "hash": "sha256-QOKyW2R/0sj4AelaMiYXFIJrJ3z2RlG8buUGaYePZAM=",
+            "digest": "sha256:18e9f2b6e4d67c24941e14b2d41ec0aa6e5f628e39f2ef2163e176de85bbe39e"
         },
-        "v1.32.12": {
-            "hash": "sha256-K3i6XC1QsrqdGA0hcVVFSUTgHu7k6wSBxk4UiySjlhI=",
-            "digest": "sha256:9edd35b2d80ba142149027c9bd2b9d72696ea9df150d819a2c58277b38972aa1"
+        "v1.32.13": {
+            "hash": "sha256-h01Y96gi59IpAocysbc8NEIC0g8TdHDOMLOCbyOAAVc=",
+            "digest": "sha256:5e9be27d5eff9604717cdb6021861490b060baa2097783fcf2e695e1035a141d"
         },
         "v1.31.14": {
             "hash": "sha256-T0AnRXG+CMH+KJXT484hMxWI+AO3C7YecIIaw5oHt6I=",
@@ -74,21 +74,21 @@
         }
     },
     "registry.k8s.io/kube-controller-manager": {
-        "v1.35.1": {
-            "hash": "sha256-mt7bhvFlaFNwRC/JLBKcBWXorHxZUKrmlBG9I44AlhY=",
-            "digest": "sha256:9fb295baa9d68543d7bbecc23e16fcdf85c8c06680f91e628535aa6fbe180dbd"
+        "v1.35.4": {
+            "hash": "sha256-M1nzT5eU6AsjjLfKcEXniHz37nOh84bFBLynVgqypWU=",
+            "digest": "sha256:7b036c805d57f203e9efaf43672cff6019b9083a9c0eb107ea8500eace29d8fd"
         },
-        "v1.34.4": {
-            "hash": "sha256-DavVlOD/JI++ofmTH6j8rRHaV6JyiUQH8TquZidAzgk=",
-            "digest": "sha256:b8f0ae8a1bddb70981f4999e63df7e59838b9b4ee27831831802317101164e1e"
+        "v1.34.7": {
+            "hash": "sha256-n7BXyrctcLgouylty+z+SCi+rhzwgweHV4vOa6amhgU=",
+            "digest": "sha256:7d759bdc4fef10a3fc1ad60ce9439d58e1a4df7ebb22751f7cc0201ce55f280b"
         },
-        "v1.33.8": {
-            "hash": "sha256-47xaRMMflBFl6AFYkzGSJy+IiL2uJ3MOUosopCCw/Vs=",
-            "digest": "sha256:4b93c08a1d78c2065518e8bbcad3132beafab937a9fd0771c82cdb63d2a050b8"
+        "v1.33.11": {
+            "hash": "sha256-unkO56WrL26ig028gtfdMJw3vUMCye/70l+mCe7ztdk=",
+            "digest": "sha256:7579451c5b3c2715da4a263c5d80a3367a24fdc12e86fde6851674d567d1dfb2"
         },
-        "v1.32.12": {
-            "hash": "sha256-gSF7hSfFu2+28oi1wl4juHwckBiR+RY79tWK8KZMdBs=",
-            "digest": "sha256:5ec07cd63e9e1690d0c9d96c76b0dae7f00b30cb177e7751d4e83e6b243d851c"
+        "v1.32.13": {
+            "hash": "sha256-Jr7gthucW1P4q89Z7T5yhfIc5tdlHF9hkvi72XJZPdA=",
+            "digest": "sha256:26bc6935bcd34136dbde00abee2bb99fef2309e20dba0203ca01add7c478501f"
         },
         "v1.31.14": {
             "hash": "sha256-uSUxy/VlRkfvTvjy8nl2pFhqxm8wkwOktzDNzWnPVyA=",
@@ -148,21 +148,21 @@
         }
     },
     "registry.k8s.io/kube-scheduler": {
-        "v1.35.1": {
-            "hash": "sha256-L4mMwiXVtezQO01+YHa6LGh41cS5n4Nrt5itpsT5+sg=",
-            "digest": "sha256:fc251ed4b8a03830bb8f75fb5fe983b3b0b5cc15a9c066d8f6c5d2e547deece8"
+        "v1.35.4": {
+            "hash": "sha256-ekS+bXcN9z4+dS3ykpZuMaTuwErKoRnLoE+30KHG7cs=",
+            "digest": "sha256:9054fecb4fa04cc63aec47b0913c8deb3487d414190cd15211f864cfe0d0b4d6"
         },
-        "v1.34.4": {
-            "hash": "sha256-4nsLJJ2+BcDNISDs0Fbd7upnziBg9dzfsLfYzwUfUns=",
-            "digest": "sha256:5b0dcf6f7178b6bff5cbf59f2a695b13987181cb1610bfca63cad50b1df8f982"
+        "v1.34.7": {
+            "hash": "sha256-6u1T8cMXRnxW6aaLPkJeFwMPVl+senMJyeyH08y18zo=",
+            "digest": "sha256:4ab32f707ff84beaac431797999707757b885196b0b9a52d29cb67f95efce7c1"
         },
-        "v1.33.8": {
-            "hash": "sha256-KGpow1Qx5bFzPRQYX87WfP4tloSCYLuhxj/yT7/3z70=",
-            "digest": "sha256:f6c5eae3f9f702a0c00e5c52aa040b2c685acfc9fd8d2646f150a183de36e72f"
+        "v1.33.11": {
+            "hash": "sha256-nO4LbRlCynlt+cDLpR0+1jy9NEBs3zWQbCZOSfP7qGg=",
+            "digest": "sha256:5506f0f94c4d9aeb071664893aabc12166bcb7f775008a6fff02d004e6091d28"
         },
-        "v1.32.12": {
-            "hash": "sha256-euYOr5jbE3Z5viHVHWqfYsx8xENnzk5+++wGQT3btIU=",
-            "digest": "sha256:c3666d5ace52c75b6dadbab830b7f135def4d1cde765756396753fb78afdcff1"
+        "v1.32.13": {
+            "hash": "sha256-K8jeJ2BaRMScL3XuGDlxdOlwscKPj+JbMaX4wfOkxVg=",
+            "digest": "sha256:f7e4075c8284a8214028de628e65209178c266dfa178fac6048884147309f6d6"
         },
         "v1.31.14": {
             "hash": "sha256-JtHZHSlEGWVmF/A5CEb9FEJrg30WGg0aCXbWueRFHHM=",
@@ -421,14 +421,8 @@
     },
     "docker.io/alpine/socat": {
         "1.8.0.3": {
-            "hash": "sha256-lCXIZpBuz6G5tCJK98B0PqFusUp2Fx3B3JMEg50VNzA=",
-            "digest": "sha256:9a44e2731464d8eeb1c1d36fb25c0335fb166ce1064534a2ac53556c4dcd8fb5"
-        }
-    },
-    "quay.io/cilium/cilium-envoy": {
-        "v1.35.9-1768828720-c6e4827ebca9c47af2a3a6540c563c30947bae29": {
-            "hash": "sha256-+DfLnDRsXXlkXwMLvmbUV9Rb/zSmwZpTQCYsLNUEKJ8=",
-            "digest": "sha256:696582a3391ce05a62edb4140e6a99f774351f363f5b5d7f1581f3a244430249"
+            "hash": "sha256-RO3NvdAWxRomyb2oPna4bTkMZx0gsYiPqmEEDl/i29I=",
+            "digest": "sha256:ca728ccb1eabd4850ee9063d50e1899a0171bdd9002f7a4126f2925578331063"
         }
     }
 }
