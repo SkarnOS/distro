@@ -68,6 +68,8 @@
         ];
 
         legacyPackages.cilium-cli = pkgs.callPackage ./cilium-cli.nix { };
+        legacyPackages.cni-plugin-flannel = pkgs.cni-plugin-flannel;
+        legacyPackages.flannel = pkgs.flannel;
         legacyPackages.skarnos = pkgs.callPackage ./skarnos/default.nix { };
 
         legacyPackages.kubernetes = lib.pipe config.rename-me.kubernetes.versions [

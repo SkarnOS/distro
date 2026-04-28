@@ -58,6 +58,7 @@ class SpecialVersion(Enum):
     PAUSE_VERSION = 4
     CILIUM_GREP = 5
     CILIUM_VERSION = 6
+    FLANNEL_GREP = 7
 
 class Source(BaseModel):
     version: str
@@ -99,7 +100,7 @@ class CouldNotResolveImageVersion(Exception):
     def __init__(self, image: str, kubernetes_version: str | None = None, exception: Exception | None = None):
         super().__init__(
             f"Could not resolve version of image {image}"
-            + (" for Kubernetes {kubernetes_version}" if kubernetes_version is not None else "")
+            + (f" for Kubernetes {kubernetes_version}" if kubernetes_version is not None else "")
             + (("\n" + str(exception)) if exception is not None else "")
         )
 

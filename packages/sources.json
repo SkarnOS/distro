@@ -59,6 +59,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -123,6 +129,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -187,6 +199,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -251,6 +269,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -315,6 +339,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -379,6 +409,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -443,6 +479,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -507,6 +549,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -571,6 +619,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -635,6 +689,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -699,6 +759,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -763,6 +829,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -827,6 +899,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -891,6 +969,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -955,6 +1039,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -1019,6 +1109,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -1083,6 +1179,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
@@ -1147,6 +1249,12 @@
             ],
             "docker.io/alpine/socat": [
                 "1.8.0.3"
+            ],
+            "ghcr.io/flannel-io/flannel-cni-plugin": [
+                "v1.8.0-flannel1"
+            ],
+            "ghcr.io/flannel-io/flannel": [
+                "v0.27.4"
             ]
         },
         "cilium_image_version": "1.19.0"
