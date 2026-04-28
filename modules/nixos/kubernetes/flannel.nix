@@ -11,8 +11,66 @@ let
       { enable = true; } // cfgK8s.network.cni.flannel
     else
       { enable = false; };
+
+  flannelSettingsFormat = pkgs.formats.json { };
 in
 {
+  options.skarnos.kubernetes.network.cni = lib.mkOption {
+    type = lib.types.attrTag {
+      "flannel" = lib.mkOption {
+        type = lib.types.submodule {
+          options = {
+            package = lib.mkOption {
+              type = lib.types.str;
+              default = "${pkgs.flannel.src}/Documentation/kube-flannel.yml";
+            };
+
+            settings = {
+              cni = lib.mkOption {
+                type = flannelSettingsFormat.type;
+                default = { };
+              };
+
+              network = lib.mkOption {
+                type = flannelSettingsFormat.type;
+                default = { };
+              };
+            };
+          };
+
+          config = {
+            settings.cni = {
+              name = lib.mkDefault "cbr0";
+              cniVersion = lib.mkDefault "0.3.1";
+              plugins = lib.mkDefault [
+                {
+                  type = "flannel";
+                  delegate = {
+                    hairpinMode = true;
+                    isDefaultGateway = true;
+                  };
+                }
+                {
+                  type = "portmap";
+                  capabilities = {
+                    portMappings = true;
+                  };
+                }
+              ];
+            };
+
+            settings.network = {
+              Network = lib.mkDefault cfgK8s.network.podSubnet;
+              EnableNFTables = lib.mkDefault config.networking.nftables.enable;
+              Backend = lib.mkDefault {
+                Type = "vxlan";
+              };
+            };
+          };
+        };
+      };
+    };
+  };
   config = lib.mkIf (cfgK8s.enable && cfg.enable) {
     boot.kernelModules = [
       # Absolutely required by kube-proxy and flannel
@@ -38,13 +96,17 @@ in
 
       path = [
         pkgs.curl
-        config.services.kubernetes.package
+        pkgs.yq-go
+        cfgK8s.package
       ];
 
       script = ''
-        curl -L https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml \
-          | sed 's~10.244.0.0/16~${cfgK8s.network.podSubnet}~' \
-          | kubectl apply -f -
+        { yq ' with(select(.kind == "ConfigMap" and .metadata.name == "kube-flannel-cfg");
+                 .data."cni-conf.json" = load_str("${flannelSettingsFormat.generate "cni-conf.json" cfg.settings.cni}")
+               | .data."net-conf.json" = load_str("${flannelSettingsFormat.generate "net-conf.json" cfg.settings.network}"))
+             ' \
+        | kubectl apply -f - \
+        ; } < ${cfg.package}
       '';
     };
   };

@@ -12,185 +12,108 @@
 }:
 let
   sshBackdoor = {
+    _file = ./kubernetes.nix;
     users.users.root.hashedPassword = "";
     services.openssh.settings.PermitRootLogin = "yes";
     services.openssh.settings.PermitEmptyPasswords = "yes";
     security.pam.services.sshd.allowNullPassword = true;
+  };
+
+  common = {
+    _file = ./kubernetes.nix;
+
+    systemd.network.enable = true;
+    networking.useNetworkd = true;
+
+    virtualisation = {
+      cores = 4;
+      memorySize = 4096;
+      diskSize = 1024 * 20;
+      restrictNetwork = true;
+
+      networking.firewall.enable = false;
+
+      systemd.network.networks."09-vmlink" = {
+        matchConfig.Name = "eth1";
+        networkConfig.Address =
+          nodes.${config.virtualisation.test.nodeName}.networking.primaryIPAddress + "/24";
+      };
+
+      services.openssh = {
+        enable = true;
+        permitRootLogin = "yes";
+      };
+
+      skarnos.kubernetes.package = lib.mkForce kubernetes;
+
+      system.stateVersion = "25.11";
+    };
+
+    networking.firewall.enable = false;
+
+    services.openssh = {
+      enable = true;
+      permitRootLogin = "yes";
+    };
+
+    system.stateVersion = "25.11";
   };
 in
 testers.nixosTest {
   name = "nix-kubernetes";
 
   nodes = {
-    httpServer =
-      { pkgs, ... }:
-      {
-        imports = [
-          sshBackdoor
-        ];
-
-        systemd.network.enable = true;
-        networking.useNetworkd = true;
-
-        networking.firewall.enable = false;
-
-        systemd.services.nginx-certs = {
-          before = [ "nginx.service" ];
-          requiredBy = [ "nginx.service" ];
-
-          path = [
-            pkgs.openssl
-          ];
-
-          script = ''
-            mkdir -p /var/lib/nginx
-            openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 365 -nodes \
-              -keyout /var/lib/nginx/cert.key -out /var/lib/nginx/cert.crt \
-              -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,DNS:one.one.one.one,DNS:k8s.io"
-            chown nginx:nginx /var/lib/nginx/{cert.crt,cert.key}
-          '';
-        };
-
-        services.nginx = {
-          enable = true;
-
-          appendHttpConfig = ''
-            error_log stderr;
-            access_log syslog:server=unix:/dev/log combined;
-          '';
-
-          virtualHosts."k8s.io" = {
-            addSSL = true;
-            sslCertificate = "/var/lib/nginx/cert.crt";
-            sslCertificateKey = "/var/lib/nginx/cert.key";
-          };
-
-          virtualHosts."one.one.one.one" = {
-            addSSL = true;
-            sslCertificate = "/var/lib/nginx/cert.crt";
-            sslCertificateKey = "/var/lib/nginx/cert.key";
-          };
-        };
-      };
-    machine =
+    controller-1 =
       { pkgs, nodes, ... }:
       {
         imports = [
           inputs.self.nixosModules."kubernetes"
           sshBackdoor
+          common
         ];
-
-        systemd.network.enable = true;
-        networking.useNetworkd = true;
-
-        virtualisation = {
-          cores = 4;
-          memorySize = 4096;
-          diskSize = 1024 * 20;
-          restrictNetwork = true;
-          forwardPorts = [
-            {
-              from = "host";
-              host.port = 2222;
-              guest.port = 22;
-            }
-            {
-              from = "host";
-              host.port = 4245;
-              guest.port = 4245;
-            }
-          ];
-        };
-
-        networking.hosts = {
-          "${nodes.httpServer.networking.primaryIPAddress}" = [
-            "one.one.one.one"
-            "k8s.io"
-          ];
-        };
-
-        services.resolved.settings.Resolve = {
-          DNS = "";
-          FallbackDNS = "";
-        };
-
-        services.kubernetes.package = kubernetes;
-
-        services.resolved.settings.Resolve = {
-          DNSStubListenerExtra = "10.224.6.1";
-        };
-
-        networking.firewall.enable = false;
 
         skarnos.kubernetes = {
           enable = true;
-          network = {
-            cni."cilium" = {
-              localIpv4 = "10.224.6.1";
-              ipv4NativeRoutingCIDR = "10.100.0.0/16";
-            };
-            ingress.interface = "eth0";
-            nameservers = [ "10.224.6.1" ];
-          };
+          package = kubernetes;
           clusterName = "test-cluster";
-        };
+          sshTarget = "controller-1";
 
-        services.openssh = {
-          enable = true;
-          permitRootLogin = "yes";
-        };
+          network = {
+            podSubnet = "10.252.0.0/15";
+            serviceSubnet = "10.254.0.0/16";
+            internal.interface = "eth0";
 
-        system.stateVersion = "25.11";
+            cni."flannel" = {
+              settings.network.IPv6Network = "fd08:4e1:1::/52";
+            };
+          };
+
+          role.controlPlane = {
+            enable = true;
+
+            hosts = [ "10.0.2.15" ];
+          };
+        };
       };
   };
 
   testScript = ''
-    import json
-    from functools import reduce
-    import operator
-    import ipaddress
+    start_all()
+    controller_1.succeed("ip route add default via 10.0.2.1");
+    controller_1.wait_for_unit("kubernetes-full.target")
 
-    def get_ip_address(machine):
-      address, prefix = next(
-          (address["local"], str(address["prefixlen"])) for address in reduce(
-            operator.add,
-            (interface["addr_info"] for interface in json.loads(httpServer.succeed("ip --json addr"))
-              if interface["ifname"] == "eth1"),
-            [])
-            if address["family"] == "inet"
-        )
+    def is_coredns_running(timeout):
+      status, coredns_unavailable_replicas = \
+        controller_1.execute("kubectl -n kube-system get deployment coredns -o jsonpath='{.status.readyReplicas}'")
 
-      ipv4_address = ipaddress.IPv4Address(address)
-      ipv4_network = ipaddress.IPv4Network(address + "/" + prefix, strict = False)
+      if status != 0:
+        return False
+      else:
+        try:
+          return int(coredns_unavailable_replicas.strip()) == 2
+        except ValueError:
+          return False
 
-      return ipv4_address, ipv4_network
-
-    machine.wait_for_unit("kubernetes-full.target")
-    httpServer.wait_for_unit("nginx.service")
-
-    machine.succeed("cilium status --wait")
-    machine.succeed("cilium hubble enable --ui")
-
-    httpServer_address, httpServer_network = get_ip_address(httpServer)
-    machine_address, machine_network = get_ip_address(machine)
-
-    httpServer_other_address = httpServer_address + 29
-    assert httpServer_other_address != machine_address
-    assert httpServer_other_address in httpServer_network
-    assert httpServer_network == machine_network
-
-    machine.succeed("cilium hubble port-forward >/dev/console &")
-
-    machine.execute(" ".join([
-      "cilium connectivity test",
-      "--single-node",
-      "--external-cidr", str(httpServer_network),
-      "--external-ip", str(httpServer_address),
-      "--external-other-ip", str(httpServer_other_address),
-      "--curl-insecure",
-      "--debug", "--verbose",
-      "--hubble", "--flow-validation warning",
-      "--test tls-intercept", "--test to-service"
-    ]))
+    retry(is_coredns_running)
   '';
 }
