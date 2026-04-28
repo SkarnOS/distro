@@ -13,6 +13,12 @@
     nix-snapshotter.url = "github:pdtpartners/nix-snapshotter";
     nix-snapshotter.inputs.nixpkgs.follows = "nixpkgs";
     nix-snapshotter.inputs.flake-parts.follows = "flake-parts";
+    example.url = "path:./example";
+    example.inputs.skarnos.follows = "";
+    example.inputs.nixpkgs.follows = "nixpkgs";
+    example.inputs.srvos.follows = "srvos";
+    example.inputs.disko.follows = "disko";
+    example.inputs.treefmt-nix.follows = "treefmt-nix";
   };
 
   outputs =

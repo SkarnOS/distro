@@ -6,30 +6,33 @@
   parallel,
   lib,
   writers,
+  openssh,
+  iputils,
+  stdenv,
 
   kubernetes,
   inputs,
 }:
 let
-  sshBackdoor = {
-    _file = ./kubernetes.nix;
-    users.users.root.hashedPassword = "";
-    services.openssh.settings.PermitRootLogin = "yes";
-    services.openssh.settings.PermitEmptyPasswords = "yes";
-    security.pam.services.sshd.allowNullPassword = true;
-  };
+  common =
+    { config, nodes, ... }:
+    {
+      _file = ./kubernetes.nix;
+      _module.args.hostName = config.virtualisation.test.nodeName;
 
-  common = {
-    _file = ./kubernetes.nix;
+      users.users.root.hashedPassword = "";
+      services.openssh.settings.PermitRootLogin = "yes";
+      services.openssh.settings.PermitEmptyPasswords = "yes";
+      security.pam.services.sshd.allowNullPassword = true;
 
-    systemd.network.enable = true;
-    networking.useNetworkd = true;
+      systemd.network.enable = true;
+      networking.useNetworkd = true;
 
-    virtualisation = {
-      cores = 4;
-      memorySize = 4096;
-      diskSize = 1024 * 20;
-      restrictNetwork = true;
+      virtualisation = {
+        cores = 4;
+        memorySize = 4096;
+        diskSize = 1024 * 20;
+      };
 
       networking.firewall.enable = false;
 
@@ -48,72 +51,141 @@ let
 
       system.stateVersion = "25.11";
     };
+in
+testers.runNixOSTest (
+  { nodes, ... }:
+  {
+    name = "nix-kubernetes";
 
-    networking.firewall.enable = false;
-
-    services.openssh = {
-      enable = true;
-      permitRootLogin = "yes";
+    node = {
+      specialArgs = {
+        inherit (inputs.example) inputs;
+        perSystem = lib.mapAttrs (
+          _: attrs: attrs.packages.${stdenv.hostPlatform.system}
+        ) inputs.example.inputs;
+      };
+      pkgsReadOnly = false;
     };
 
-    system.stateVersion = "25.11";
-  };
-in
-testers.nixosTest {
-  name = "nix-kubernetes";
+    nodes = {
+      controller-1 =
+        { pkgs, nodes, ... }:
+        {
+          imports = [
+            common
+            "${inputs.example}/hosts/controller-1/configuration.nix"
+          ];
 
-  nodes = {
-    controller-1 =
-      { pkgs, nodes, ... }:
-      {
-        imports = [
-          inputs.self.nixosModules."kubernetes"
-          sshBackdoor
-          common
-        ];
+          skarnos.kubernetes = {
+            sshTarget = "controller-1";
 
-        skarnos.kubernetes = {
-          enable = true;
-          package = kubernetes;
-          clusterName = "test-cluster";
-          sshTarget = "controller-1";
+            network = {
+              podSubnet = "10.252.0.0/15";
+              serviceSubnet = "10.254.0.0/16";
+              internal.interface = lib.mkForce "eth1";
 
-          network = {
-            podSubnet = "10.252.0.0/15";
-            serviceSubnet = "10.254.0.0/16";
-            internal.interface = "eth0";
+              cni."flannel" = {
+                settings.network.IPv6Network = "fd08:4e1:1::/52";
+              };
+            };
 
-            cni."flannel" = {
-              settings.network.IPv6Network = "fd08:4e1:1::/52";
+            role.controlPlane.hosts = [ "10.0.2.15" ];
+          };
+
+          virtualisation = {
+            forwardPorts = [
+              {
+                from = "host";
+                host.port = 2221;
+                guest.port = 22;
+              }
+            ];
+          };
+        };
+
+      worker-1 =
+        { pkgs, nodes, ... }:
+        {
+          imports = [
+            common
+            "${inputs.example}/hosts/worker-1/configuration.nix"
+          ];
+
+          skarnos.kubernetes = {
+            sshTarget = "worker-1";
+
+            network = {
+              podSubnet = "10.252.0.0/15";
+              serviceSubnet = "10.254.0.0/16";
+              internal.interface = lib.mkForce "eth1";
+
+              cni."flannel" = {
+                settings.network.IPv6Network = "fd08:4e1:1::/52";
+              };
             };
           };
 
-          role.controlPlane = {
-            enable = true;
-
-            hosts = [ "10.0.2.15" ];
+          virtualisation = {
+            forwardPorts = [
+              {
+                from = "host";
+                host.port = 2222;
+                guest.port = 22;
+              }
+            ];
           };
         };
-      };
-  };
+    };
 
-  testScript = ''
-    start_all()
-    controller_1.succeed("ip route add default via 10.0.2.1");
-    controller_1.wait_for_unit("kubernetes-full.target")
+    testScript = ''
+      import subprocess
+      import os
 
-    def is_coredns_running(timeout):
-      status, coredns_unavailable_replicas = \
-        controller_1.execute("kubectl -n kube-system get deployment coredns -o jsonpath='{.status.readyReplicas}'")
+      os.environ["PATH"] = os.environ["PATH"] + ":${openssh}/bin:${iputils}/bin"
+      os.environ["NIX_SSHOPTS"] = "-oStrictHostKeyChecking=no"
 
-      if status != 0:
-        return False
-      else:
-        try:
-          return int(coredns_unavailable_replicas.strip()) == 2
-        except ValueError:
+      fish_out_netif_ip_command = "${
+        lib.getExe inputs."self".legacyPackages.${stdenv.hostPlatform.system}.fish-out-netif-ip
+      }"
+      skarnos_command = "${lib.getExe inputs."self".legacyPackages.${stdenv.hostPlatform.system}.skarnos}"
+
+      def is_coredns_running(timeout):
+        status, coredns_unavailable_replicas = \
+          controller_1.execute("kubectl -n kube-system get deployment coredns -o jsonpath='{.status.readyReplicas}'")
+
+        if status != 0:
           return False
+        else:
+          try:
+            return int(coredns_unavailable_replicas.strip()) == 2
+          except ValueError:
+            return False
 
-    retry(is_coredns_running)
-  '';
-}
+      def are_all_nodes_ready(timeout):
+        status, coredns_unavailable_replicas = \
+          controller_1.execute("kubectl get nodes -o 'jsonpath={.items[*].status.conditions}' | jq --slurp --exit-status --raw-output '[. | flatten | .[] | select(.type == \"Ready\")] | all(.status == \"True\")'")
+
+        if status != 0:
+          return False
+        else:
+          return True
+
+      controller_1.start()
+      controller_1.wait_for_unit("sshd.service")
+
+      worker_1.start()
+      worker_1.wait_for_unit("sshd.service")
+
+      controller_1.wait_for_unit("kubernetes-full.target")
+      worker_1.wait_for_unit("kubernetes-full.target")
+
+      retry(is_coredns_running)
+
+      process = subprocess.run(f"{skarnos_command} join --interface eth1 --address ssh://root@localhost:2221 ssh://root@localhost:2222", shell=True)
+      assert process.returncode == 0, f"`skarnos join`: exited with exit code {process.returncode}"
+
+      retry(are_all_nodes_ready)
+
+    '';
+  }
+)
