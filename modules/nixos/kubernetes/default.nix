@@ -707,8 +707,12 @@ in
     };
 
     systemd.services."kubernetes-image-preload" = {
-      requiredBy = [ "kubeadm-init.service" ];
-      before = [ "kubeadm-init.service" ];
+      requiredBy =
+        (lib.optional cfg.role.controlPlane.enable "kubeadm-init.service")
+        ++ (lib.optional cfg.role.worker.enable "kubeadm-join.service");
+      before =
+        (lib.optional cfg.role.controlPlane.enable "kubeadm-init.service")
+        ++ (lib.optional cfg.role.worker.enable "kubeadm-join.service");
       after = [ "containerd.service" ];
 
       script =
