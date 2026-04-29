@@ -9,7 +9,7 @@
   services.kubernetes.kubelet.hostname = "controller-1";
   skarnos.kubernetes = {
     enable = true;
-    package = perSystem."skarnos"."kubernetes_1_33";
+    package = perSystem."skarnos"."kubernetes_1_35";
     clusterName = "skarnos";
     sshTarget = "root@78.46.203.160";
 
