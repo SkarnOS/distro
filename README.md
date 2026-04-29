@@ -42,6 +42,6 @@ The repository is structured as such:
 
   contains Kubernetes packages and various supporting container images, along with a updater script which can be used to automatically update everything.
 
-## Contributing
+# Contributing
 
 Even though this project is an early prototype, contributions are already welcome. We want to develop this in public from the early days. Currently what we would appreciate most is help with cleaning up the NixOS modules, they contain a lot of commented out code, which needs to be either uncommented and tested or dropped.
