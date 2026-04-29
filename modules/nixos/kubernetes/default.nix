@@ -19,8 +19,6 @@ let
     cfg.network.ingress.interface
     + lib.optionalString (cfg.network.ingress.vlanId != null) ".${toString cfg.network.ingress.vlanId}";
 
-  fishOutNetifIp = pkgs.callPackage ./fish-out-netif-ip.nix { };
-
   kubeadmConfig = pkgs.writeText "kubeadm-config.yaml" ''
     ---
     apiVersion: kubeadm.k8s.io/v1beta4
@@ -338,16 +336,14 @@ in
         socat
         conntrack-tools
         iptables-nftables-compat
+        inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.fish-out-netif-ip
       ]
       ++ (lib.optional (cfg.upgradePackage != null) (
         pkgs.runCommand "kubeadm-upgrade" { inherit (cfg) upgradePackage; } ''
           mkdir -p $out/bin
           cp $upgradePackage/bin/kubeadm $out/bin/upgrade-kubeadm
         ''
-      ))
-      ++ [
-        fishOutNetifIp
-      ];
+      ));
 
     systemd.services.kubelet.serviceConfig.EnvironmentFile = "/var/lib/kubelet/kubeadm-flags.env";
 
@@ -786,7 +782,7 @@ in
             pkgs.yq-go
             pkgs.jq
             pkgs.iproute2
-            fishOutNetifIp
+            inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.fish-out-netif-ip
           ];
 
           environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
@@ -846,7 +842,7 @@ in
         pkgs.yq-go
         pkgs.jq
         pkgs.iproute2
-        fishOutNetifIp
+        inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.fish-out-netif-ip
       ];
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
