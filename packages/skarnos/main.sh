@@ -1,10 +1,17 @@
 #!/usr/bin/env nix
 #! nix shell nixpkgs#openssl -c bash --
 
-set -euEo pipefail
+echo "$PATH"
+
+set -xeuEo pipefail
 
 function _ssh () {
-    ssh -o ControlMaster=auto -o ControlPath="$_tmpdir/control_master_%C" "$@"
+    if [[ -n "${NIX_SSHOPTS:-}" ]] ; then
+        # shellcheck disable=SC2086
+        ssh -vv $NIX_SSHOPTS "$@"
+    else
+        ssh -vv -o ControlMaster=auto -o ControlPath="$_tmpdir/control_master_%C" "$@"
+    fi
 }
 
 function _get_token() {
@@ -12,22 +19,57 @@ function _get_token() {
 }
 
 function _command_join() {
-    _control_plane="${1:-}"
-    _worker="${2:-}"
-
-    if [[ -z "${_control_plane}" ]] || [[ -z "${_worker}" ]] ; then
+    function _command_join_help() {
         cat <<EOF
-skarnos join CONTROL_PLANE WORKER
+skarnos join [--address] CONTROL_PLANE WORKER
   - CONTROL_PLANE - SSH target for a control plane node
   - WORKER - SSH target for the worker node you want to join
 EOF
         exit 1
+    }
+
+    declare _address _control_plane _worker _interface
+    while [[ "$#" -gt 0 ]] ; do
+        case "$1" in
+            "--interface")
+                _interface="$2"
+                shift 2
+                ;;
+            "--address")
+                _address=true
+                shift 1
+                ;;
+            *)
+                if [[ -z "${_control_plane:-}" ]] ; then
+                    _control_plane="$1"
+                elif [[ -z "${_worker:-}" ]] ; then
+                    _worker="$1"
+                else
+                    printf 'Unknown argument "%s"\n' "$1"
+                    _command_join_help
+                fi
+                shift 1
+                ;;
+        esac
+    done
+
+    if [[ -z "${_control_plane:-}" ]] || [[ -z "${_worker:-}" ]] ; then
+        _command_join_help
     fi
 
-    _control_plane_address="$(nix eval --raw ".#nixosConfigurations.${_control_plane}.config.skarnos.kubernetes.sshTarget")"
-    _interface="$(nix eval --raw ".#nixosConfigurations.${_control_plane}.config.skarnos.kubernetes.network.internal.interface")"
-    _worker_address="$(nix eval --raw ".#nixosConfigurations.${_worker}.config.skarnos.kubernetes.sshTarget")"
     declare _control_plane_address _worker_address
+
+    if [[ -z "${_interface:-}" ]] ; then
+        _interface="$(nix eval --raw ".#nixosConfigurations.${_control_plane}.config.skarnos.kubernetes.network.internal.interface")"
+    fi
+
+    if [[ "$_address" = "true" ]] ; then
+        _control_plane_address="${_control_plane}"
+        _worker_address="${_worker}"
+    else
+        _control_plane_address="$(nix eval --raw ".#nixosConfigurations.${_control_plane}.config.skarnos.kubernetes.sshTarget")"
+        _worker_address="$(nix eval --raw ".#nixosConfigurations.${_worker}.config.skarnos.kubernetes.sshTarget")"
+    fi
 
     declare _tmpdir
     _tmpdir="$(mktemp -d)"
