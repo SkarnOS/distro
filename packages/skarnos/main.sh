@@ -1,27 +1,48 @@
 #!/usr/bin/env nix
 #! nix shell nixpkgs#openssl -c bash --
 
-echo "$PATH"
+set -euEo pipefail
 
-set -xeuEo pipefail
+if [[ -n "${NIX_DEBUG:-}" ]] ; then
+    set -x
+fi
 
 function _ssh () {
+    _sudo="$1" ; shift 1
+    _hostname="$1" ; shift 1
+
+    _command=( ssh )
     if [[ -n "${NIX_SSHOPTS:-}" ]] ; then
-        # shellcheck disable=SC2086
-        ssh -vv $NIX_SSHOPTS "$@"
+        # shellcheck disable=SC2206
+        _command+=( $NIX_SSHOPTS )
     else
-        ssh -vv -o ControlMaster=auto -o ControlPath="$_tmpdir/control_master_%C" "$@"
+        _command+=( -o ControlMaster=auto -o ControlPath="$_tmpdir/control_master_%C" )
     fi
+    _command+=( "$_hostname" )
+    if [[ "$_sudo" = "true" ]] ; then
+        _command+=( sudo sh -c )
+        _subcommand=""
+        for _arg in "$@" ; do
+            _subcommand="$_subcommand $_arg"
+        done
+        _command+=( "\"$_subcommand\"" )
+    fi
+
+    printf ">> %s\n" "${_command[@]}" >&2
+
+    "${_command[@]}"
 }
 
 function _get_token() {
-    _ssh "$_control_plane_address" kubeadm token create --ttl 1h
+    _sudo="$1"
+
+    _ssh "$_sudo" "$_control_plane_address" kubeadm token create --ttl 1h
 }
 
 function _command_join() {
     function _command_join_help() {
         cat <<EOF
-skarnos join [--address] CONTROL_PLANE WORKER
+skarnos join [--address] [--sudo] CONTROL_PLANE WORKER
   - CONTROL_PLANE - SSH target for a control plane node
   - WORKER - SSH target for the worker node you want to join
 EOF
@@ -39,6 +60,10 @@ EOF
                 _address=true
                 shift 1
                 ;;
+            "--sudo")
+                _sudo=true
+                shift 1
+                ;;
             *)
                 if [[ -z "${_control_plane:-}" ]] ; then
                     _control_plane="$1"
@@ -53,6 +78,8 @@ EOF
         esac
     done
 
+    : "${_sudo:=false}"
+
     if [[ -z "${_control_plane:-}" ]] || [[ -z "${_worker:-}" ]] ; then
         _command_join_help
     fi
@@ -63,7 +90,7 @@ EOF
         _interface="$(nix eval --raw ".#nixosConfigurations.${_control_plane}.config.skarnos.kubernetes.network.internal.interface")"
     fi
 
-    if [[ "$_address" = "true" ]] ; then
+    if [[ "${_address:-}" = "true" ]] ; then
         _control_plane_address="${_control_plane}"
         _worker_address="${_worker}"
     else
@@ -76,26 +103,26 @@ EOF
     # shellcheck disable=SC2064
     trap "rm -r $_tmpdir" EXIT
 
-    if _ssh "$_control_plane_address" kubectl get node "$_worker" >/dev/null 2>&1; then
+    if _ssh "$_sudo" "$_control_plane_address" kubectl get node "$_worker" >/dev/null; then
         printf 'Worker %s is already part of the cluster, doing nothing...\n' "$_worker"
         exit 0
     fi
 
-    declare _token _cert_digest _
-    _token="$(_get_token "$_control_plane_address")"
-    _cert_digest="$(openssl x509 -pubkey -in <(_ssh "$_control_plane_address" cat /etc/kubernetes/pki/ca.crt) \
+    declare _token _cert_digest _control_plane_internal_address
+    _token="$(_get_token "$_sudo" "$_control_plane_address")"
+    _cert_digest="$(openssl x509 -pubkey -in <(_ssh "$_sudo" "$_control_plane_address" cat /etc/kubernetes/pki/ca.crt) \
                          | openssl rsa -pubin -outform der 2>/dev/null \
                          | openssl dgst -sha256 -hex \
                          | cut -f2 -d" ")"
-    _control_plane_internal_address="$(_ssh "$_control_plane_address" fish-out-netif-ip "$_interface")"
+    _control_plane_internal_address="$(_ssh "$_sudo" "$_control_plane_address" fish-out-netif-ip "$_interface")"
 
-    _ssh "$_worker_address" "mkdir -p /var/lib/kubeadm-join ; umask 0077 ; touch /var/lib/kubeadm-join/secret.env"
-    _ssh "$_worker_address" "cat > /var/lib/kubeadm-join/secret.env" <<EOF
+    _ssh "$_sudo" "$_worker_address" "mkdir -p /var/lib/kubeadm-join ; umask 0077 ; touch /var/lib/kubeadm-join/secret.env"
+    _ssh "$_sudo" "$_worker_address" "cat > /var/lib/kubeadm-join/secret.env" <<EOF
 CONTROL_PLANE_ADDRESS="$_control_plane_internal_address"
 JOIN_TOKEN="$_token"
 DISCOVERY_TOKEN_CA_CERT_HASH="sha256:$_cert_digest"
 EOF
-    _ssh "$_worker_address" "systemctl restart kubernetes-full.target"
+    _ssh "$_sudo" "$_worker_address" "systemctl restart kubernetes-full.target"
 }
 
 function _command_install() {
