@@ -11,6 +11,7 @@
     enable = true;
     package = perSystem."skarnos"."kubernetes_1_33";
     clusterName = "skarnos";
+    sshTarget = "root@78.46.203.160";
 
     network = {
       podSubnet = "10.252.0.0/15";

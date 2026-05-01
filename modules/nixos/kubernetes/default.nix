@@ -112,6 +112,10 @@ in
       default = throw "You must select a Kubernetes version from the supported versions provided by SkarnOS.";
     };
 
+    sshTarget = lib.mkOption {
+      type = lib.types.str;
+    };
+
     upgradePackage = lib.mkOption {
       description = "A Kubernetes package from which `kubeadm` will be installed into PATH as `upgrade-kubeadm`";
       type = lib.types.nullOr lib.types.package;
