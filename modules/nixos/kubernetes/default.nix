@@ -98,7 +98,6 @@ in
   imports = [
     (lib.modules.importApply ./cilium.nix { inherit inputs; })
     ./flannel.nix
-    ./firewall.nix
     ./openebs.nix
     (lib.modules.importApply ./nix-snapshotter.nix { inherit inputs; })
   ];
@@ -425,59 +424,8 @@ in
         "cni/net.d".enable = false; # Let kubeadm handle this
         # Setting a mode forces this to not be a symlink, because we cannot resolve symlinks to /nix in containers
         "ssl/certs/ca-certificates.crt".mode = "0444";
-        /*
-          "kubernetes/stop-node".source = ./stop-node;
-          "kubernetes/elma-crb.yaml".source = ./elma-crb.yaml;
-          "kubernetes/oidc.yaml" = lib.mkIf (cfg.elmaAudience != null) {
-            # No symlink
-            mode = "0444";
-            text = # yaml
-              ''
-                ---
-                apiVersion: apiserver.config.k8s.io/v1beta1
-                kind: AuthenticationConfiguration
-                jwt:
-                - issuer:
-                    url: https://elma.id
-                    audiences:
-                    - ${cfg.elmaAudience}
-                    audienceMatchPolicy: MatchAny
-                  claimMappings:
-                    username:
-                      claim: "sub"
-                      prefix: "elma:"
-                    groups:
-                      claim: "groups"
-                      prefix: "elma:"
-              '';
-          };
-        */
       };
     };
-
-    # helsinki = {
-    #   #monitoring.hostConfig.vars.dns_resolver_enable = true;
-
-    #   /*
-    #     disko.mountOptions."/" = lib.mkIf cfg.ceph.enable [ "dev" ];
-
-    #     monitoring.hostConfig.vars.extra_filesystems_ignore_dests = [
-    #       "^${config.services.kubernetes.dataDir}/plugins/.*"
-    #       "^${config.services.kubernetes.dataDir}/pods/.*"
-    #       "^/run/containerd/.*"
-    #     ];
-
-    #     heb = {
-    #       paths = [ "/etc/kubernetes/" ];
-    #       excludes = [
-    #         "${config.services.kubernetes.dataDir}/"
-    #         "/var/lib/containerd/"
-    #       ];
-    #     };
-    #   */
-
-    #   # TODO promtail
-    # };
 
     # Workaround: https://github.com/ceph/ceph/pull/60006#issuecomment-2834332814
     services.udev.extraRules =
@@ -502,80 +450,6 @@ in
           "|/etc/kubernetes/bootstrap-kubelet.conf"
           "|/etc/kubernetes/kubelet.conf"
         ];
-
-        /*
-                apparmor = {
-                  enable = false;
-                  extraConfig = ''
-                    ${config.environment.etc.os-release.source} r,
-                    /dev/disk/** r,
-                    /dev/kmsg rw,
-                    /etc/machine-id r,
-                    /run/containerd/containerd.sock rw,
-                    /run/mount/utab r,
-                    /run/systemd/private rw,
-                    /run/dbus/system_bus_socket rw,
-                    /run/xtables.lock rwklm,
-                    /sys/** r, # It really needs a lot of info
-                    /sys/fs/cgroup/** rwklm,
-                    @{PROC}/diskstats r,
-                    @{PROC}/loadavg r,
-                    @{PROC}/swaps r,
-                    @{PROC}/sys/kernel/** r, # It really needs a lot of info
-                    @{PROC}/sys/kernel/panic rw,
-                    @{PROC}/sys/vm/** r, # It really needs a lot of info
-                    @{PROC}/sys/vm/overcommit_memory rw,
-                    @{PROC}@{pid}/** rw,
-                    deny /nix/store/ r,
-
-                    # This would normally be in ReadWritePaths, but that would create a new
-                    # mount namespace which would prevent us from doing containerd things
-                    /etc/kubernetes/** rwklm,
-                    /opt/cni/bin/ r,
-                    /opt/cni/bin/** rwklm,
-                    ${config.services.kubernetes.dataDir}/** rwklm,
-                    /var/log/pods/ r,
-                    /var/log/pods/** rwklm,
-                    /var/log/containers/ r,
-                    /var/log/containers/** rwklm,
-                    /usr/libexec/** rwklm,
-                    /tmp/** rwixklm,
-                    /run/current-system/kernel-modules/lib/modules/** r,
-                    /run/booted-system/kernel-modules/lib/modules/** r,
-                    /nix/store/** r,
-                    ${lib.optionalString cfg.openebs.enable ''
-                      /home/keys/ rwklm,
-                      /home/keys/** rwklm,
-                      /var/openebs/** rwklm,
-                      /var/openebs/local/** rwklm,
-                      /var/local/openebs/io-engine/ rwklm,
-                      /var/local/openebs/io-engine/** rwklm,
-                      /sys/kernel/mm/hugepages/ r,
-                      /sys/kernel/mm/hugepages/** r,
-                    ''}
-
-                    capability chown,
-                    capability dac_override,
-                    capability dac_read_search,
-                    capability fowner,
-                    capability net_admin,
-                    capability sys_admin,
-                    capability sys_ptrace,
-                    capability sys_resource,
-                    capability syslog,
-
-                    ptrace (read, readby) peer=@{profile_name},
-                    ptrace (read, readby) peer=unconfined, # whatever
-
-                    mount ${config.services.kubernetes.dataDir}/pods/**,
-                    umount ${config.services.kubernetes.dataDir}/pods/**,
-
-                    network udp,
-                    network tcp,
-                    network netlink raw,
-                  '';
-                };
-        */
       };
     };
 
@@ -597,21 +471,6 @@ in
 
         -- Add servers
       ''
-      /*
-        + lib.concatMapStringsSep "\n" (
-          hostname: # lua
-          ''
-            newServer({
-                address="${lib.head helsinkiLib.hosts."${hostname}".v6}",
-                name="${lib.removeSuffix config.helsinki.wg.helsinki.meta.dnsSuffix hostname}",
-                useClientSubnet=true,
-                -- Health check
-                checkInterval=10,
-                mustResolve=true
-            })
-          '') config.helsinki.wg.helsinki.meta.resolverHosts
-        # lua
-      */
       + ''
         -- create pool
         getPool("kubernetes")
@@ -633,14 +492,6 @@ in
         addAction(SuffixMatchNodeRule(reverseSuffix), PoolAction("kubernetes"))
       '';
     };
-    # networking = {
-    #   nameservers = [ "127.0.0.1" ];
-    #   search = lib.mkDefault [
-    #     "default.svc.cluster.local"
-    #     "svc.cluster.local"
-    #     "cluster.local"
-    #   ];
-    # };
 
     systemd = {
       tmpfiles.rules = [
@@ -730,44 +581,6 @@ in
         RemainAfterExit = "yes";
       };
     };
-
-    # systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
-    #   requiredBy = [ "kubernetes-full.target" ];
-    #   before = [ "kubernetes-full.target" ];
-
-    #   script =
-    #     let
-    #       tokenFilter = ''
-    #         [
-    #           .[] | select(
-    #                 .kind == "BootstrapToken"
-    #             and ( reduce ((.groups // []) [] | contains("bootstrappers") ) as $b (false; . or $b))
-    #             and (.expires | fromdateiso8601) > now
-    #           )
-    #         ][0].token
-    #       '';
-    #     in
-    #     ''
-    #       _tmpdir="$(mktemp -d)"
-
-    #       function _ssh () {
-    #         ssh -o ControlMaster=yes -o ControlPath "$_tmpdir/control_master" "$@"
-    #       }
-
-    #       function _get_token() {
-    #         _ssh "$_control_plane" kubeadm token create --ttl 1h
-    #       }
-
-    #       _token="$(get_token)"
-    #       _cert_digest"$(openssl x509 -pubkey -in <(_ssh "$_control_plane" cat /etc/kubernetes/pki/ca.crt) \
-    #                        | openssl rsa -pubin -outform der 2>/dev/null \
-    #                        | openssl dgst -sha256 -hex
-    #                        | cut -f2 -d" ")"
-
-    #       echo "$_token"
-    #       echo "$_cert_digest"
-    #     '';
-    # };
 
     # containerd defaults to the ZFS snapshotter, that's no longer needed as ZFS works
     # with overlayfs since semi-recently
