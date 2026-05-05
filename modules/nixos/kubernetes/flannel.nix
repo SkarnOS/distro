@@ -35,6 +35,10 @@ in
                 type = flannelSettingsFormat.type;
                 default = { };
               };
+
+              arguments = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+              };
             };
           };
 
@@ -66,6 +70,11 @@ in
                 Type = "vxlan";
               };
             };
+
+            settings.arguments = [
+              "--ip-masq"
+              "--kube-subnet-mgr"
+            ];
           };
         };
       };
@@ -104,6 +113,11 @@ in
         { yq ' with(select(.kind == "ConfigMap" and .metadata.name == "kube-flannel-cfg");
                  .data."cni-conf.json" = load_str("${flannelSettingsFormat.generate "cni-conf.json" cfg.settings.cni}")
                | .data."net-conf.json" = load_str("${flannelSettingsFormat.generate "net-conf.json" cfg.settings.network}"))
+             | with(select(.kind == "DaemonSet" and .metadata.name == "kube-flannel-ds");
+                 .spec.template.spec.containers = [
+                   .spec.template.spec.containers[] | with(select(.name == "kube-flannel");
+                     .args = ${builtins.toJSON cfg.settings.arguments})
+                 ])
              ' \
         | kubectl apply -f - \
         ; } < ${cfg.package}
