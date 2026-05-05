@@ -1,8 +1,15 @@
-{ inputs, lib, ... }:
+{
+  inputs,
+  lib,
+  ...
+}:
 let
   doTestKubernetes =
     system: kubernetes:
-    lib.meta.availableOn { inherit system; } kubernetes && kubernetes.passthru.is_maintained;
+    lib.meta.availableOn { inherit system; } kubernetes
+    && kubernetes.passthru.is_maintained
+    # we don't have aarch64-linux runners that can do KVM...
+    && system != "aarch64-linux";
 in
 {
   perSystem =

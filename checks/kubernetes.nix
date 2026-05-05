@@ -6,191 +6,186 @@
   parallel,
   lib,
   writers,
+  openssh,
+  iputils,
+  stdenv,
 
   kubernetes,
   inputs,
 }:
 let
-  sshBackdoor = {
-    users.users.root.hashedPassword = "";
-    services.openssh.settings.PermitRootLogin = "yes";
-    services.openssh.settings.PermitEmptyPasswords = "yes";
-    security.pam.services.sshd.allowNullPassword = true;
-  };
+  common =
+    { config, nodes, ... }:
+    {
+      _file = ./kubernetes.nix;
+      _module.args.hostName = config.virtualisation.test.nodeName;
+
+      users.users.root.hashedPassword = "";
+      services.openssh.settings.PermitRootLogin = "yes";
+      services.openssh.settings.PermitEmptyPasswords = "yes";
+      security.pam.services.sshd.allowNullPassword = true;
+
+      systemd.network.enable = true;
+      networking.useNetworkd = true;
+
+      virtualisation = {
+        cores = 4;
+        memorySize = 4096;
+        diskSize = 1024 * 20;
+      };
+
+      networking.firewall.enable = false;
+
+      systemd.network.networks."09-vmlink" = {
+        matchConfig.Name = "eth1";
+        networkConfig.Address =
+          nodes.${config.virtualisation.test.nodeName}.networking.primaryIPAddress + "/24";
+      };
+
+      services.openssh = {
+        enable = true;
+        permitRootLogin = "yes";
+      };
+
+      skarnos.kubernetes.package = lib.mkForce kubernetes;
+
+      system.stateVersion = "25.11";
+    };
 in
-testers.nixosTest {
-  name = "nix-kubernetes";
+testers.runNixOSTest (
+  { nodes, ... }:
+  {
+    name = "nix-kubernetes";
 
-  nodes = {
-    httpServer =
-      { pkgs, ... }:
-      {
-        imports = [
-          sshBackdoor
-        ];
-
-        systemd.network.enable = true;
-        networking.useNetworkd = true;
-
-        networking.firewall.enable = false;
-
-        systemd.services.nginx-certs = {
-          before = [ "nginx.service" ];
-          requiredBy = [ "nginx.service" ];
-
-          path = [
-            pkgs.openssl
-          ];
-
-          script = ''
-            mkdir -p /var/lib/nginx
-            openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 365 -nodes \
-              -keyout /var/lib/nginx/cert.key -out /var/lib/nginx/cert.crt \
-              -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,DNS:one.one.one.one,DNS:k8s.io"
-            chown nginx:nginx /var/lib/nginx/{cert.crt,cert.key}
-          '';
-        };
-
-        services.nginx = {
-          enable = true;
-
-          appendHttpConfig = ''
-            error_log stderr;
-            access_log syslog:server=unix:/dev/log combined;
-          '';
-
-          virtualHosts."k8s.io" = {
-            addSSL = true;
-            sslCertificate = "/var/lib/nginx/cert.crt";
-            sslCertificateKey = "/var/lib/nginx/cert.key";
-          };
-
-          virtualHosts."one.one.one.one" = {
-            addSSL = true;
-            sslCertificate = "/var/lib/nginx/cert.crt";
-            sslCertificateKey = "/var/lib/nginx/cert.key";
-          };
-        };
+    node = {
+      specialArgs = {
+        inherit (inputs.example) inputs;
+        perSystem = lib.mapAttrs (
+          _: attrs: attrs.packages.${stdenv.hostPlatform.system}
+        ) inputs.example.inputs;
       };
-    machine =
-      { pkgs, nodes, ... }:
-      {
-        imports = [
-          inputs.self.nixosModules."kubernetes"
-          sshBackdoor
-        ];
+      pkgsReadOnly = false;
+    };
 
-        systemd.network.enable = true;
-        networking.useNetworkd = true;
-
-        virtualisation = {
-          cores = 4;
-          memorySize = 4096;
-          diskSize = 1024 * 20;
-          restrictNetwork = true;
-          forwardPorts = [
-            {
-              from = "host";
-              host.port = 2222;
-              guest.port = 22;
-            }
-            {
-              from = "host";
-              host.port = 4245;
-              guest.port = 4245;
-            }
+    nodes = {
+      controller-1 =
+        { pkgs, nodes, ... }:
+        {
+          imports = [
+            common
+            "${inputs.example}/hosts/controller-1/configuration.nix"
           ];
-        };
 
-        networking.hosts = {
-          "${nodes.httpServer.networking.primaryIPAddress}" = [
-            "one.one.one.one"
-            "k8s.io"
-          ];
-        };
+          skarnos.kubernetes = {
+            sshTarget = "controller-1";
 
-        services.resolved.settings.Resolve = {
-          DNS = "";
-          FallbackDNS = "";
-        };
+            network = {
+              podSubnet = "10.252.0.0/15";
+              serviceSubnet = "10.254.0.0/16";
+              internal.interface = lib.mkForce "eth1";
 
-        services.kubernetes.package = kubernetes;
-
-        services.resolved.settings.Resolve = {
-          DNSStubListenerExtra = "10.224.6.1";
-        };
-
-        networking.firewall.enable = false;
-
-        rename-me.kubernetes = {
-          enable = true;
-          network = {
-            cni."cilium" = {
-              localIpv4 = "10.224.6.1";
-              ipv4NativeRoutingCIDR = "10.100.0.0/16";
+              cni."flannel" = {
+                settings.network.IPv6Network = "fd08:4e1:1::/52";
+              };
             };
-            ingress.interface = "eth0";
-            nameservers = [ "10.224.6.1" ];
+
+            role.controlPlane.hosts = [ "10.0.2.15" ];
           };
-          clusterName = "test-cluster";
+
+          virtualisation = {
+            forwardPorts = [
+              {
+                from = "host";
+                host.port = 2221;
+                guest.port = 22;
+              }
+            ];
+          };
         };
 
-        services.openssh = {
-          enable = true;
-          permitRootLogin = "yes";
+      worker-1 =
+        { pkgs, nodes, ... }:
+        {
+          imports = [
+            common
+            "${inputs.example}/hosts/worker-1/configuration.nix"
+          ];
+
+          skarnos.kubernetes = {
+            sshTarget = "worker-1";
+
+            network = {
+              podSubnet = "10.252.0.0/15";
+              serviceSubnet = "10.254.0.0/16";
+              internal.interface = lib.mkForce "eth1";
+
+              cni."flannel" = {
+                settings.network.IPv6Network = "fd08:4e1:1::/52";
+              };
+            };
+          };
+
+          virtualisation = {
+            forwardPorts = [
+              {
+                from = "host";
+                host.port = 2222;
+                guest.port = 22;
+              }
+            ];
+          };
         };
+    };
 
-        system.stateVersion = "25.11";
-      };
-  };
+    testScript = ''
+      import subprocess
+      import os
 
-  testScript = ''
-    import json
-    from functools import reduce
-    import operator
-    import ipaddress
+      os.environ["PATH"] = os.environ["PATH"] + ":${openssh}/bin:${iputils}/bin"
+      os.environ["NIX_SSHOPTS"] = "-oStrictHostKeyChecking=no"
 
-    def get_ip_address(machine):
-      address, prefix = next(
-          (address["local"], str(address["prefixlen"])) for address in reduce(
-            operator.add,
-            (interface["addr_info"] for interface in json.loads(httpServer.succeed("ip --json addr"))
-              if interface["ifname"] == "eth1"),
-            [])
-            if address["family"] == "inet"
-        )
+      fish_out_netif_ip_command = "${
+        lib.getExe inputs."self".legacyPackages.${stdenv.hostPlatform.system}.fish-out-netif-ip
+      }"
+      skarnos_command = "${lib.getExe inputs."self".legacyPackages.${stdenv.hostPlatform.system}.skarnos}"
 
-      ipv4_address = ipaddress.IPv4Address(address)
-      ipv4_network = ipaddress.IPv4Network(address + "/" + prefix, strict = False)
+      def is_coredns_running(timeout):
+        status, coredns_unavailable_replicas = \
+          controller_1.execute("kubectl -n kube-system get deployment coredns -o jsonpath='{.status.readyReplicas}'")
 
-      return ipv4_address, ipv4_network
+        if status != 0:
+          return False
+        else:
+          try:
+            return int(coredns_unavailable_replicas.strip()) == 2
+          except ValueError:
+            return False
 
-    machine.wait_for_unit("kubernetes-full.target")
-    httpServer.wait_for_unit("nginx.service")
+      def are_all_nodes_ready(timeout):
+        status, coredns_unavailable_replicas = \
+          controller_1.execute("kubectl get nodes -o 'jsonpath={.items[*].status.conditions}' | jq --slurp --exit-status --raw-output '[. | flatten | .[] | select(.type == \"Ready\")] | all(.status == \"True\")'")
 
-    machine.succeed("cilium status --wait")
-    machine.succeed("cilium hubble enable --ui")
+        if status != 0:
+          return False
+        else:
+          return True
 
-    httpServer_address, httpServer_network = get_ip_address(httpServer)
-    machine_address, machine_network = get_ip_address(machine)
+      controller_1.start()
+      controller_1.wait_for_unit("sshd.service")
 
-    httpServer_other_address = httpServer_address + 29
-    assert httpServer_other_address != machine_address
-    assert httpServer_other_address in httpServer_network
-    assert httpServer_network == machine_network
+      worker_1.start()
+      worker_1.wait_for_unit("sshd.service")
 
-    machine.succeed("cilium hubble port-forward >/dev/console &")
+      controller_1.wait_for_unit("kubernetes-full.target")
+      worker_1.wait_for_unit("kubernetes-full.target")
 
-    machine.execute(" ".join([
-      "cilium connectivity test",
-      "--single-node",
-      "--external-cidr", str(httpServer_network),
-      "--external-ip", str(httpServer_address),
-      "--external-other-ip", str(httpServer_other_address),
-      "--curl-insecure",
-      "--debug", "--verbose",
-      "--hubble", "--flow-validation warning",
-      "--test tls-intercept", "--test to-service"
-    ]))
-  '';
-}
+      retry(is_coredns_running)
+
+      process = subprocess.run(f"{skarnos_command} join --interface eth1 --address ssh://root@localhost:2221 ssh://root@localhost:2222", shell=True)
+      assert process.returncode == 0, f"`skarnos join`: exited with exit code {process.returncode}"
+
+      retry(are_all_nodes_ready)
+
+    '';
+  }
+)

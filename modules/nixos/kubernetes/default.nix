@@ -9,7 +9,7 @@
 }:
 
 let
-  cfg = config.rename-me.kubernetes;
+  cfg = config.skarnos.kubernetes;
   internalInterfaceName =
     (if cfg.network.internal.interface == null then "dummy0" else cfg.network.internal.interface)
     + lib.optionalString (
@@ -18,8 +18,6 @@ let
   ingressInterfaceName =
     cfg.network.ingress.interface
     + lib.optionalString (cfg.network.ingress.vlanId != null) ".${toString cfg.network.ingress.vlanId}";
-
-  fishOutNetifIp = pkgs.callPackage ./fish-out-netif-ip.nix { };
 
   kubeadmConfig = pkgs.writeText "kubeadm-config.yaml" ''
     ---
@@ -86,7 +84,9 @@ let
         lib.concatMapStringsSep "" (ip: ", \"${ip}\"") cfg.role.controlPlane.hosts
       } ]
     proxy:
-      disabled: true
+      disabled: ${if cfg.network.kubeProxy then "false" else "true"}
+    dns:
+      disabled: ${if cfg.network.coredns then "false" else "true"}
     ---
     apiVersion: kubelet.config.k8s.io/v1beta1
     kind: KubeletConfiguration
@@ -98,13 +98,20 @@ in
   imports = [
     (lib.modules.importApply ./cilium.nix { inherit inputs; })
     ./flannel.nix
-    ./firewall.nix
     ./openebs.nix
     (lib.modules.importApply ./nix-snapshotter.nix { inherit inputs; })
   ];
 
-  options.rename-me.kubernetes = {
+  options.skarnos.kubernetes = {
     enable = lib.mkEnableOption "a kubeadm-managed Kubernetes node";
+
+    package = lib.mkPackageOption pkgs "kubernetes" { } // {
+      default = throw "You must select a Kubernetes version from the supported versions provided by SkarnOS.";
+    };
+
+    sshTarget = lib.mkOption {
+      type = lib.types.str;
+    };
 
     upgradePackage = lib.mkOption {
       description = "A Kubernetes package from which `kubeadm` will be installed into PATH as `upgrade-kubeadm`";
@@ -153,6 +160,14 @@ in
         '';
       };
 
+      kubeProxy = lib.mkEnableOption "Whether to enable the `kube-proxy`." // {
+        default = true;
+      };
+
+      coredns = lib.mkEnableOption "Whether to enable `coredns`." // {
+        default = true;
+      };
+
       cni = lib.mkOption {
         description = "Name of the CNI the host will be prepared for. Note that cilium has to be used in kube-proxy replacement mode. There is no IPv6 for Flannel";
         type = lib.types.attrTag {
@@ -167,7 +182,14 @@ in
 
       nameservers = lib.mkOption {
         type = lib.types.listOf lib.types.str;
-        default = lib.take 3 config.networking.nameservers;
+        default =
+          if config.networking.nameservers != [ ] then
+            lib.take 3 config.networking.nameservers
+          else
+            [
+              "8.8.8.8"
+              "8.8.4.4"
+            ];
       };
 
       dontConfigureNetworkd =
@@ -313,21 +335,20 @@ in
         socat
         conntrack-tools
         iptables-nftables-compat
+        inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.fish-out-netif-ip
       ]
       ++ (lib.optional (cfg.upgradePackage != null) (
         pkgs.runCommand "kubeadm-upgrade" { inherit (cfg) upgradePackage; } ''
           mkdir -p $out/bin
           cp $upgradePackage/bin/kubeadm $out/bin/upgrade-kubeadm
         ''
-      ))
-      ++ [
-        fishOutNetifIp
-      ];
+      ));
 
     systemd.services.kubelet.serviceConfig.EnvironmentFile = "/var/lib/kubelet/kubeadm-flags.env";
 
     services = {
       kubernetes = {
+        package = cfg.package;
         roles = [ "node" ]; # we use a stacked control plane by default
         apiserverAddress = ""; # We set this using `kubeadm init`
         dataDir = "/var/lib/kubelet";
@@ -350,7 +371,7 @@ in
                 )
               }"
             ])
-            + " \${KUBELET_KUBEADM_ARGS}";
+            + " $KUBELET_KUBEADM_ARGS";
         };
         # Features we don't need on a stacked control plane
         proxy.enable = false;
@@ -403,59 +424,8 @@ in
         "cni/net.d".enable = false; # Let kubeadm handle this
         # Setting a mode forces this to not be a symlink, because we cannot resolve symlinks to /nix in containers
         "ssl/certs/ca-certificates.crt".mode = "0444";
-        /*
-          "kubernetes/stop-node".source = ./stop-node;
-          "kubernetes/elma-crb.yaml".source = ./elma-crb.yaml;
-          "kubernetes/oidc.yaml" = lib.mkIf (cfg.elmaAudience != null) {
-            # No symlink
-            mode = "0444";
-            text = # yaml
-              ''
-                ---
-                apiVersion: apiserver.config.k8s.io/v1beta1
-                kind: AuthenticationConfiguration
-                jwt:
-                - issuer:
-                    url: https://elma.id
-                    audiences:
-                    - ${cfg.elmaAudience}
-                    audienceMatchPolicy: MatchAny
-                  claimMappings:
-                    username:
-                      claim: "sub"
-                      prefix: "elma:"
-                    groups:
-                      claim: "groups"
-                      prefix: "elma:"
-              '';
-          };
-        */
       };
     };
-
-    # helsinki = {
-    #   #monitoring.hostConfig.vars.dns_resolver_enable = true;
-
-    #   /*
-    #     disko.mountOptions."/" = lib.mkIf cfg.ceph.enable [ "dev" ];
-
-    #     monitoring.hostConfig.vars.extra_filesystems_ignore_dests = [
-    #       "^${config.services.kubernetes.dataDir}/plugins/.*"
-    #       "^${config.services.kubernetes.dataDir}/pods/.*"
-    #       "^/run/containerd/.*"
-    #     ];
-
-    #     heb = {
-    #       paths = [ "/etc/kubernetes/" ];
-    #       excludes = [
-    #         "${config.services.kubernetes.dataDir}/"
-    #         "/var/lib/containerd/"
-    #       ];
-    #     };
-    #   */
-
-    #   # TODO promtail
-    # };
 
     # Workaround: https://github.com/ceph/ceph/pull/60006#issuecomment-2834332814
     services.udev.extraRules =
@@ -480,80 +450,6 @@ in
           "|/etc/kubernetes/bootstrap-kubelet.conf"
           "|/etc/kubernetes/kubelet.conf"
         ];
-
-        /*
-                apparmor = {
-                  enable = false;
-                  extraConfig = ''
-                    ${config.environment.etc.os-release.source} r,
-                    /dev/disk/** r,
-                    /dev/kmsg rw,
-                    /etc/machine-id r,
-                    /run/containerd/containerd.sock rw,
-                    /run/mount/utab r,
-                    /run/systemd/private rw,
-                    /run/dbus/system_bus_socket rw,
-                    /run/xtables.lock rwklm,
-                    /sys/** r, # It really needs a lot of info
-                    /sys/fs/cgroup/** rwklm,
-                    @{PROC}/diskstats r,
-                    @{PROC}/loadavg r,
-                    @{PROC}/swaps r,
-                    @{PROC}/sys/kernel/** r, # It really needs a lot of info
-                    @{PROC}/sys/kernel/panic rw,
-                    @{PROC}/sys/vm/** r, # It really needs a lot of info
-                    @{PROC}/sys/vm/overcommit_memory rw,
-                    @{PROC}@{pid}/** rw,
-                    deny /nix/store/ r,
-
-                    # This would normally be in ReadWritePaths, but that would create a new
-                    # mount namespace which would prevent us from doing containerd things
-                    /etc/kubernetes/** rwklm,
-                    /opt/cni/bin/ r,
-                    /opt/cni/bin/** rwklm,
-                    ${config.services.kubernetes.dataDir}/** rwklm,
-                    /var/log/pods/ r,
-                    /var/log/pods/** rwklm,
-                    /var/log/containers/ r,
-                    /var/log/containers/** rwklm,
-                    /usr/libexec/** rwklm,
-                    /tmp/** rwixklm,
-                    /run/current-system/kernel-modules/lib/modules/** r,
-                    /run/booted-system/kernel-modules/lib/modules/** r,
-                    /nix/store/** r,
-                    ${lib.optionalString cfg.openebs.enable ''
-                      /home/keys/ rwklm,
-                      /home/keys/** rwklm,
-                      /var/openebs/** rwklm,
-                      /var/openebs/local/** rwklm,
-                      /var/local/openebs/io-engine/ rwklm,
-                      /var/local/openebs/io-engine/** rwklm,
-                      /sys/kernel/mm/hugepages/ r,
-                      /sys/kernel/mm/hugepages/** r,
-                    ''}
-
-                    capability chown,
-                    capability dac_override,
-                    capability dac_read_search,
-                    capability fowner,
-                    capability net_admin,
-                    capability sys_admin,
-                    capability sys_ptrace,
-                    capability sys_resource,
-                    capability syslog,
-
-                    ptrace (read, readby) peer=@{profile_name},
-                    ptrace (read, readby) peer=unconfined, # whatever
-
-                    mount ${config.services.kubernetes.dataDir}/pods/**,
-                    umount ${config.services.kubernetes.dataDir}/pods/**,
-
-                    network udp,
-                    network tcp,
-                    network netlink raw,
-                  '';
-                };
-        */
       };
     };
 
@@ -575,21 +471,6 @@ in
 
         -- Add servers
       ''
-      /*
-        + lib.concatMapStringsSep "\n" (
-          hostname: # lua
-          ''
-            newServer({
-                address="${lib.head helsinkiLib.hosts."${hostname}".v6}",
-                name="${lib.removeSuffix config.helsinki.wg.helsinki.meta.dnsSuffix hostname}",
-                useClientSubnet=true,
-                -- Health check
-                checkInterval=10,
-                mustResolve=true
-            })
-          '') config.helsinki.wg.helsinki.meta.resolverHosts
-        # lua
-      */
       + ''
         -- create pool
         getPool("kubernetes")
@@ -611,14 +492,6 @@ in
         addAction(SuffixMatchNodeRule(reverseSuffix), PoolAction("kubernetes"))
       '';
     };
-    # networking = {
-    #   nameservers = [ "127.0.0.1" ];
-    #   search = lib.mkDefault [
-    #     "default.svc.cluster.local"
-    #     "svc.cluster.local"
-    #     "cluster.local"
-    #   ];
-    # };
 
     systemd = {
       tmpfiles.rules = [
@@ -685,8 +558,12 @@ in
     };
 
     systemd.services."kubernetes-image-preload" = {
-      requiredBy = [ "kubeadm-init.service" ];
-      before = [ "kubeadm-init.service" ];
+      requiredBy =
+        (lib.optional cfg.role.controlPlane.enable "kubeadm-init.service")
+        ++ (lib.optional cfg.role.worker.enable "kubeadm-join.service");
+      before =
+        (lib.optional cfg.role.controlPlane.enable "kubeadm-init.service")
+        ++ (lib.optional cfg.role.worker.enable "kubeadm-join.service");
       after = [ "containerd.service" ];
 
       script =
@@ -705,108 +582,72 @@ in
       };
     };
 
-    # systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
-    #   requiredBy = [ "kubernetes-full.target" ];
-    #   before = [ "kubernetes-full.target" ];
-
-    #   script =
-    #     let
-    #       tokenFilter = ''
-    #         [
-    #           .[] | select(
-    #                 .kind == "BootstrapToken"
-    #             and ( reduce ((.groups // []) [] | contains("bootstrappers") ) as $b (false; . or $b))
-    #             and (.expires | fromdateiso8601) > now
-    #           )
-    #         ][0].token
-    #       '';
-    #     in
-    #     ''
-    #       _tmpdir="$(mktemp -d)"
-
-    #       function _ssh () {
-    #         ssh -o ControlMaster=yes -o ControlPath "$_tmpdir/control_master" "$@"
-    #       }
-
-    #       function _get_token() {
-    #         _ssh "$_control_plane" kubeadm token create --ttl 1h
-    #       }
-
-    #       _token="$(get_token)"
-    #       _cert_digest"$(openssl x509 -pubkey -in <(_ssh "$_control_plane" cat /etc/kubernetes/pki/ca.crt) \
-    #                        | openssl rsa -pubin -outform der 2>/dev/null \
-    #                        | openssl dgst -sha256 -hex
-    #                        | cut -f2 -d" ")"
-
-    #       echo "$_token"
-    #       echo "$_cert_digest"
-    #     '';
-    # };
-
     # containerd defaults to the ZFS snapshotter, that's no longer needed as ZFS works
     # with overlayfs since semi-recently
     virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.snapshotter =
       lib.mkOverride 101 "overlayfs";
 
-    systemd.services."kubeadm-join" = lib.mkIf cfg.role.worker.enable {
-      requiredBy = [ "kubernetes-full.target" ];
-      before = [ "kubernetes-full.target" ];
+    systemd.services."kubeadm-join" =
+      lib.mkIf (cfg.role.worker.enable && !cfg.role.controlPlane.enable)
+        {
+          requiredBy = [ "kubernetes-full.target" ];
+          before = [ "kubernetes-full.target" ];
 
-      path = [
-        config.services.kubernetes.package
-        pkgs.util-linux
-        pkgs.yq-go
-        pkgs.jq
-        pkgs.iproute2
-        fishOutNetifIp
-      ];
+          path = [
+            config.services.kubernetes.package
+            pkgs.util-linux
+            pkgs.yq-go
+            pkgs.jq
+            pkgs.iproute2
+            inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.fish-out-netif-ip
+          ];
 
-      environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
+          environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
-      unitConfig.ConditionPathExists = "/var/lib/kubeadm-join/secret.env";
+          unitConfig.ConditionPathExists = "/var/lib/kubeadm-join/secret.env";
 
-      serviceConfig = {
-        RuntimeDirectory = "kubeadm-join";
-        StateDirectory = "kubeadm-join";
-        EnvironmentFile = "/var/lib/kubeadm-join/secret.env";
-        Type = "oneshot";
-        RemainAfterExit = "yes";
-      };
+          serviceConfig = {
+            RuntimeDirectory = "kubeadm-join";
+            StateDirectory = "kubeadm-join";
+            EnvironmentFile = "/var/lib/kubeadm-join/secret.env";
+            Type = "oneshot";
+            RemainAfterExit = "yes";
+          };
 
-      script = ''
-        set -eEuo pipefail
+          script = ''
+            set -eEuo pipefail
 
-        _config="/etc/kubernetes/kubeadm-config.yaml"
-        cp ${kubeadmConfig} "$_config"
+            _config="/etc/kubernetes/kubeadm-config.yaml"
+            cp ${kubeadmConfig} "$_config"
 
-        cat >> "$_config" <<-EOF
-        ---
-        apiVersion: kubeadm.k8s.io/v1beta4
-        kind: JoinConfiguration
-        discovery:
-          tlsBootstrapToken: "$JOIN_TOKEN"
-          bootstrapToken:
-            token: "$JOIN_TOKEN"
-            apiServerEndpoint: "$CONTROL_PLANE_ADDRESS:6443"
-            caCertHashes: [ "$DISCOVERY_TOKEN_CA_CERT_HASH" ]
-        EOF
+            cat >> "$_config" <<-EOF
+            ---
+            apiVersion: kubeadm.k8s.io/v1beta4
+            kind: JoinConfiguration
+            discovery:
+              tlsBootstrapToken: "$JOIN_TOKEN"
+              bootstrapToken:
+                token: "$JOIN_TOKEN"
+                apiServerEndpoint: "$CONTROL_PLANE_ADDRESS:6443"
+                caCertHashes: [ "$DISCOVERY_TOKEN_CA_CERT_HASH" ]
+            EOF
 
-        ${lib.optionalString (cfg.network.internal.interface != null) ''
-          _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
+            ${lib.optionalString (cfg.network.internal.interface != null) ''
+              _interface_ip=$(fish-out-netif-ip ${cfg.network.internal.interface})
 
-          echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
+              echo "Using $_interface_ip as 'localAPIEndpoint.advertiseAddress', 'apiServer.certSANs', and 'nodeRegistration.kubeletExtraArgs[\"--node-ip\"]'"
 
-          yq --inplace \
-             '   with(select(.kind == "JoinConfiguration");
-                   .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
-                 | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])' \
-             "$_config"
-        ''}
+              yq --inplace \
+                 '   with(select(.kind == "JoinConfiguration");
+                       .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
+                     | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])' \
+                 "$_config"
+            ''}
 
-        cat "$_config"
-        kubeadm join --config "$_config"
-      '';
-    };
+            cat "$_config"
+            kubeadm join --config "$_config"
+          '';
+        };
 
     systemd.services."kubeadm-init" = lib.mkIf cfg.role.controlPlane.enable {
       requiredBy = [ "kubernetes-full.target" ];
@@ -818,7 +659,7 @@ in
         pkgs.yq-go
         pkgs.jq
         pkgs.iproute2
-        fishOutNetifIp
+        inputs."self".legacyPackages.${pkgs.stdenv.hostPlatform.system}.fish-out-netif-ip
       ];
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
@@ -867,7 +708,9 @@ in
 
         touch /etc/kubernetes/.kubeadm-init-done
 
-        kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+        ${lib.optionalString cfg.role.worker.enable ''
+          kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+        ''}
       '';
 
       serviceConfig = {

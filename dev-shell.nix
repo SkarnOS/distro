@@ -15,6 +15,7 @@
           pkgs.nix-eval-jobs
           pkgs.nix-fast-build
           config.legacyPackages.cilium-cli
+          pkgs.yq-go
           (pkgs.python3.withPackages (ps: [
             ps.pydantic
             ps.requests

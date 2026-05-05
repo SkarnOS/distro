@@ -21,6 +21,7 @@ containers = {
     "registry.k8s.io/kube-apiserver": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/kube-controller-manager": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/kube-scheduler": [SpecialVersion.KUBERNETES],
+    "registry.k8s.io/kube-proxy": [SpecialVersion.KUBERNETES],
     "registry.k8s.io/pause": [SpecialVersion.PAUSE_VERSION],
     "quay.io/cilium/cilium": [SpecialVersion.CILIUM_VERSION],
     "quay.io/cilium/operator-generic": [SpecialVersion.CILIUM_VERSION],
@@ -37,7 +38,9 @@ containers = {
     "quay.io/cilium/test-connection-disruption": [SpecialVersion.CILIUM_GREP],
     "quay.io/cilium/json-mock": [SpecialVersion.CILIUM_GREP],
     "quay.io/frrouting/frr": [SpecialVersion.CILIUM_GREP],
-    "docker.io/alpine/socat": [SpecialVersion.CILIUM_GREP]
+    "docker.io/alpine/socat": [SpecialVersion.CILIUM_GREP],
+    "ghcr.io/flannel-io/flannel-cni-plugin": [SpecialVersion.FLANNEL_GREP],
+    "ghcr.io/flannel-io/flannel": [SpecialVersion.FLANNEL_GREP]
 }
 
 sem: asyncio.Semaphore | NoopSemaphore = NoopSemaphore()
@@ -61,6 +64,39 @@ async def run_command(command: list[str], tmpdir: str) -> tuple[str, str]:
         )
 
     return (stdout, stderr)
+
+@alru_cache(maxsize=512)
+async def grep_flannel_source(tmpdir: str, image: str) -> str:
+    try:
+        async with sem:
+            flannel_src, stderr = await run_command(
+                command = [
+                    "nix", "build", "--impure",
+                    "--print-out-paths",
+                    "--expr", f'''
+                    let
+                      flake = builtins.getFlake "git+file://{Path.cwd()}";
+                    in
+                      flake.legacyPackages.${{builtins.currentSystem}}.flannel.src
+                    '''
+                ],
+                tmpdir = tmpdir
+            )
+    except ProcessFailed as exception:
+        raise CouldNotResolveImageVersion(
+            exception = exception,
+            image = image
+        )
+
+    with open(flannel_src.strip() + b"/Documentation/kube-flannel.yml", "r") as yaml_file:
+        yaml = yaml_file.read()
+
+        match = re.search(f'(?<=image: {image}:)(.+)', yaml)
+
+        if match:
+            return match.group(0)
+        else:
+            raise CouldNotResolveImageVersion(image = image)
 
 @alru_cache(maxsize=512)
 async def get_cilium_image_version(tmpdir: str) -> str:
@@ -91,8 +127,6 @@ async def get_cilium_image_version(tmpdir: str) -> str:
 
     except ProcessFailed as exception:
         raise CouldNotResolveImageVersion(
-            kubernetes_version = kubernetes_version,
-            image = image,
             exception = exception
         )
 
@@ -122,7 +156,7 @@ async def prefetch_kubernetes_version(tmpdir: str, release: Release):
             )
     except ProcessFailed as exception:
         raise CouldNotResolveImageVersion(
-            kubernetes_version = kubernetes_version,
+            kubernetes_version = release.latest.name,
             image = image,
             exception = exception
         )
@@ -148,7 +182,7 @@ async def resolve_special_version(tmpdir: str, kubernetes_version: str, image: s
     if image_version == SpecialVersion.KUBERNETES:
         return f"v{kubernetes_version}"
 
-    if image_version == SpecialVersion.CILIUM_GREP:
+    elif image_version == SpecialVersion.CILIUM_GREP:
         try:
             async with sem:
                 cilium_src, stderr = await run_command(
@@ -180,8 +214,10 @@ async def resolve_special_version(tmpdir: str, kubernetes_version: str, image: s
                 return match.group(0)
             else:
                 raise CouldNotResolveImageVersion(kubernetes_version = kubernetes_version, image = image)
-    if image_version == SpecialVersion.CILIUM_VERSION:
+    elif image_version == SpecialVersion.CILIUM_VERSION:
         return "v" + await get_cilium_image_version(tmpdir)
+    elif image_version == SpecialVersion.FLANNEL_GREP:
+        return await grep_flannel_source(tmpdir, image)
     else:
         try:
             async with sem:

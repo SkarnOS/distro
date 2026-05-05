@@ -5,11 +5,11 @@
   ...
 }:
 let
-  cfgK8s = config.rename-me.kubernetes;
-  cfg = config.rename-me.kubernetes.nix-snapshotter;
+  cfgK8s = config.skarnos.kubernetes;
+  cfg = config.skarnos.kubernetes.nix-snapshotter;
 in
 {
-  options.rename-me.kubernetes.nix-snapshotter = {
+  options.skarnos.kubernetes.nix-snapshotter = {
     enable = lib.mkEnableOption "Enable nix-snapshotter";
   };
 
