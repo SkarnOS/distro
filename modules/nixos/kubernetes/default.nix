@@ -644,6 +644,7 @@ in
 
             cat "$_config"
             kubeadm join --config "$_config"
+            systemctl start --no-block kubernetes-full.target
           '';
         };
 
@@ -706,6 +707,8 @@ in
         ${lib.optionalString cfg.role.worker.enable ''
           kubectl taint nodes --all node-role.kubernetes.io/control-plane-
         ''}
+
+        systemctl start --no-block kubernetes-full.target
       '';
 
       serviceConfig = {
