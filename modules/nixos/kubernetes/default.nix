@@ -628,6 +628,10 @@ in
                 token: "$JOIN_TOKEN"
                 apiServerEndpoint: "$CONTROL_PLANE_ADDRESS:6443"
                 caCertHashes: [ "$DISCOVERY_TOKEN_CA_CERT_HASH" ]
+            ${lib.optionalString cfg.role.controlPlane.enable ''
+              controlPlane:
+                certificateKey: "$CERTIFICATE_KEY"
+            ''}
             EOF
 
             ${lib.optionalString (cfg.network.internal.interface != null) ''
