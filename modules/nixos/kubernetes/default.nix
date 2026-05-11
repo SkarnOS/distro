@@ -640,6 +640,13 @@ in
                        .localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'"
                      | .nodeRegistration.kubeletExtraArgs = [ { "name": "node-ip", "value": "'"$_interface_ip"'" } ])' \
                  "$_config"
+
+              ${lib.optionalString cfg.role.controlPlane.enable ''
+                yq --inplace \
+                  '   with(select(.kind == "JoinConfiguration");
+                        .controlPlane.localAPIEndpoint.advertiseAddress = "'"$_interface_ip"'")' \
+                  "$_config"
+              ''}
             ''}
 
             cat "$_config"
