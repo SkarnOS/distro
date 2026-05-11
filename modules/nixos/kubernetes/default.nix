@@ -589,7 +589,7 @@ in
       lib.mkOverride 101 "overlayfs";
 
     systemd.services."kubeadm-join" =
-      lib.mkIf (cfg.role.worker.enable && !cfg.role.controlPlane.enable)
+      lib.mkIf (cfg.role.worker.enable || cfg.role.controlPlane.enable)
         {
           path = [
             config.services.kubernetes.package
