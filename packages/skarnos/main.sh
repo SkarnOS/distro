@@ -20,13 +20,15 @@ function _ssh () {
     fi
     _command+=( "$_hostname" )
     if [[ "$_sudo" = "true" ]] ; then
-        _command+=( sudo sh -c )
-        _subcommand=""
-        for _arg in "$@" ; do
-            _subcommand="$_subcommand $_arg"
-        done
-        _command+=( "\"$_subcommand\"" )
+        _command+=( sudo )
     fi
+
+    _command+=( sh -c )
+    _subcommand=""
+    for _arg in "$@" ; do
+        _subcommand="$_subcommand $_arg"
+    done
+    _command+=( "\"$_subcommand\"" )
 
     printf ">> %s\n" "${_command[@]}" >&2
 
