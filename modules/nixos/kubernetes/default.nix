@@ -705,7 +705,7 @@ in
         touch /etc/kubernetes/.kubeadm-init-done
 
         ${lib.optionalString cfg.role.worker.enable ''
-          kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+          kubectl taint node ${config.networking.hostName} node-role.kubernetes.io/control-plane-
         ''}
 
         systemctl start --no-block kubernetes-full.target
