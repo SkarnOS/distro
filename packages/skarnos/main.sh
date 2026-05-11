@@ -122,6 +122,7 @@ CONTROL_PLANE_ADDRESS="$_control_plane_internal_address"
 JOIN_TOKEN="$_token"
 DISCOVERY_TOKEN_CA_CERT_HASH="sha256:$_cert_digest"
 EOF
+    _ssh "$_sudo" "$_worker_address" "systemctl start kubeadm-join.service"
     _ssh "$_sudo" "$_worker_address" "systemctl restart kubernetes-full.target"
 }
 

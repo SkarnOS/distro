@@ -176,13 +176,15 @@ testers.runNixOSTest (
       worker_1.start()
       worker_1.wait_for_unit("sshd.service")
 
+      controller_1.execute("systemctl start kubeadm-init.service")
       controller_1.wait_for_unit("kubernetes-full.target")
-      worker_1.wait_for_unit("kubernetes-full.target")
 
       retry(is_coredns_running)
 
       process = subprocess.run(f"{skarnos_command} join --interface eth1 --address ssh://root@localhost:2221 ssh://root@localhost:2222", shell=True)
       assert process.returncode == 0, f"`skarnos join`: exited with exit code {process.returncode}"
+
+      worker_1.wait_for_unit("kubernetes-full.target")
 
       retry(are_all_nodes_ready)
 

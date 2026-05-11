@@ -439,18 +439,19 @@ in
         KERNEL=="dm-*", ENV{DM_NAME}=="*-*_rmeta_*", PROGRAM="${splitDmName} %E{DM_NAME}", SYMLINK+="%c"
       '';
 
-    systemd.services = {
-      kubelet = {
-        stopIfChanged = false;
-        # Ensures we have the right iptables flavor
-        path = lib.mkBefore [ pkgs.iptables-nftables-compat ];
+    systemd.services."kubelet" = {
+      stopIfChanged = false;
+      # Ensures we have the right iptables flavor
+      path = lib.mkBefore [ pkgs.iptables-nftables-compat ];
 
-        # Don't crash-loop the daemon
-        unitConfig.AssertFileNotEmpty = [
-          "|/etc/kubernetes/bootstrap-kubelet.conf"
-          "|/etc/kubernetes/kubelet.conf"
-        ];
-      };
+      requiredBy = [ "kubernetes-full.target" ];
+      before = [ "kubernetes-full.target" ];
+
+      # Don't crash-loop the daemon
+      unitConfig.AssertFileNotEmpty = [
+        "|/etc/kubernetes/bootstrap-kubelet.conf"
+        "|/etc/kubernetes/kubelet.conf"
+      ];
     };
 
     # Cluster DNS
@@ -590,9 +591,6 @@ in
     systemd.services."kubeadm-join" =
       lib.mkIf (cfg.role.worker.enable && !cfg.role.controlPlane.enable)
         {
-          requiredBy = [ "kubernetes-full.target" ];
-          before = [ "kubernetes-full.target" ];
-
           path = [
             config.services.kubernetes.package
             pkgs.util-linux
@@ -650,9 +648,6 @@ in
         };
 
     systemd.services."kubeadm-init" = lib.mkIf cfg.role.controlPlane.enable {
-      requiredBy = [ "kubernetes-full.target" ];
-      before = [ "kubernetes-full.target" ];
-
       path = [
         config.services.kubernetes.package
         pkgs.util-linux
