@@ -98,8 +98,6 @@ in
 
     systemd.services."kube-flannel-install" = lib.mkIf cfgK8s.role.controlPlane.enable {
       requiredBy = [ "kubernetes-full.target" ];
-      requires = [ "kubeadm-init.service" ];
-      after = [ "kubeadm-init.service" ];
 
       environment."KUBECONFIG" = "/etc/kubernetes/admin.conf";
 
