@@ -91,6 +91,8 @@ let
     apiVersion: kubelet.config.k8s.io/v1beta1
     kind: KubeletConfiguration
     serverTLSBootstrap: true
+    ---
+    ${lib.join "\n---\n" cfg.kubeadmExtraConfig}
   '';
 in
 {
@@ -273,6 +275,11 @@ in
         default = [ ];
         example = [ "my-host:6443" ];
       };
+    };
+
+    kubeadmExtraConfig = lib.mkOption {
+      type = lib.types.listOf lib.types.lines;
+      default = [ ];
     };
   };
 
