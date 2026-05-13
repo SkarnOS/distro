@@ -44,14 +44,14 @@ function _get_token() {
 function _command_join() {
     function _command_join_help() {
         cat <<EOF
-skarnos join [--address] [--sudo] CONTROL_PLANE WORKER
+skarnos join [--address] [--sudo] [--control-plane (true|false)] CONTROL_PLANE WORKER
   - CONTROL_PLANE - SSH target for a control plane node
   - WORKER - SSH target for the worker node you want to join
 EOF
         exit 1
     }
 
-    declare _address _control_plane _worker _interface
+    declare _address _control_plane _worker _interface _is_control_plane
     while [[ "$#" -gt 0 ]] ; do
         case "$1" in
             "--interface")
@@ -60,6 +60,13 @@ EOF
                 ;;
             "--address")
                 _address=true
+                shift 1
+                ;;
+            "--control-plane")
+                _is_control_plane="$1"
+                if ! { [[ "$_is_control_plane" == "false" ]] || [[ "$_is_control_plane" == "true" ]] ; } ; then
+                    _command_join_help
+                fi
                 shift 1
                 ;;
             "--sudo")
@@ -81,6 +88,7 @@ EOF
     done
 
     : "${_sudo:=false}"
+    : "${_is_control_plane:=$(nix eval ".#nixosConfigurations.${_control_plane}.config.skarnos.kubernetes.role.controlPlane.enable")}"
 
     if [[ -z "${_control_plane:-}" ]] || [[ -z "${_worker:-}" ]] ; then
         _command_join_help
@@ -124,6 +132,14 @@ CONTROL_PLANE_ADDRESS="$_control_plane_internal_address"
 JOIN_TOKEN="$_token"
 DISCOVERY_TOKEN_CA_CERT_HASH="sha256:$_cert_digest"
 EOF
+
+    if [[ "$_is_control_plane" == "true" ]] ; then
+      _certificate_key="$(_ssh "$_sudo" "$_control_plane_address" "kubeadm init phase upload-certs --upload-certs --config /etc/kubernetes/kubeadm-config.yaml" | tail -n 1)"
+      _ssh "$_sudo" "$_worker_address" "cat >> /var/lib/kubeadm-join/secret.env" <<EOF
+CERTIFICATE_KEY="$_certificate_key"
+EOF
+    fi
+
     _ssh "$_sudo" "$_worker_address" "systemctl start kubeadm-join.service"
     _ssh "$_sudo" "$_worker_address" "systemctl restart kubernetes-full.target"
 }
