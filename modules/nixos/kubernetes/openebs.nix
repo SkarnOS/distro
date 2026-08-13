@@ -22,6 +22,9 @@ in
 
     environment.systemPackages = lib.mkIf cfg.enable [ pkgs.lvm2 ];
 
+    # lvm-localpv also needs a dedicated LVM volume group on the node. Create
+    # an empty VG (e.g. with disko) and point the StorageClass at it.
+
     # OpenEBS's lvm-localpv mounts the host and expects this binary to exist.
     systemd.tmpfiles.rules = lib.mkIf cfg.enable [
       "d /sbin 0755 root root -"
