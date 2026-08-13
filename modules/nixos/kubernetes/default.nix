@@ -306,6 +306,7 @@ in
         # Alloy
         "fs.inotify.max_user_watches" = lib.mkOverride 999 524288;
         "fs.inotify.max_user_instances" = lib.mkOverride 999 524288;
+        "fs.inotify.max_queued_events" = lib.mkOverride 999 65536;
       }
       // lib.optionalAttrs cfg.openebs.enable {
         "vm.nr_hugepages" = lib.mkDefault 1024;
