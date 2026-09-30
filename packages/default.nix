@@ -59,13 +59,12 @@
           if lib.isString version then config.rename-me.kubernetes.versions.${version} else version
         ) (lib.importJSON ./sources.json);
 
-        packages = lib.mkMerge [
-          (lib.filterAttrs (_: value: lib.isDerivation value) config.legacyPackages)
-          (lib.mapAttrs' (version: lib.nameValuePair "ociImage_${version}") config.legacyPackages.ociImages)
-          (lib.mapAttrs' (
+        packages = lib.filterAttrs (_: lib.meta.availableOn pkgs.stdenv.hostPlatform) (
+          lib.filterAttrs (_: lib.isDerivation) config.legacyPackages
+          // lib.mapAttrs' (
             version: lib.nameValuePair "kubernetes_${version}"
-          ) config.legacyPackages.kubernetes)
-        ];
+          ) config.legacyPackages.kubernetes
+        );
 
         legacyPackages.cilium-cli = pkgs.callPackage ./cilium-cli.nix { };
         legacyPackages.cni-plugin-flannel = pkgs.cni-plugin-flannel;

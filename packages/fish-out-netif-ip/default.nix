@@ -1,4 +1,5 @@
 {
+  lib,
   writeShellApplication,
   iproute2,
   jq,
@@ -10,4 +11,5 @@ writeShellApplication {
     jq
     iproute2
   ];
+  meta.platforms = lib.platforms.linux;
 }

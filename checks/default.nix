@@ -21,11 +21,14 @@ in
     }:
     {
       checks = lib.mkMerge [
-        (lib.filterAttrs (_: value: doTestKubernetes system value) (
-          lib.mapAttrs' (
-            name: value: lib.nameValuePair ("kubernetes_" + name) value
-          ) config.legacyPackages.kubernetes
-        ))
+        (lib.mapAttrs' (name: lib.nameValuePair "package-${name}") config.packages)
+
+        (lib.mapAttrs' (name: lib.nameValuePair "devshell-${name}") config.devShells)
+
+        (lib.pipe inputs.self.nixosConfigurations [
+          (lib.filterAttrs (_: nixos: nixos.pkgs.stdenv.hostPlatform.system == system))
+          (lib.mapAttrs' (name: nixos: lib.nameValuePair "nixos-${name}" nixos.config.system.build.toplevel))
+        ])
 
         (lib.pipe config.legacyPackages.kubernetes [
           (lib.filterAttrs (version: _: lib.length (lib.splitString "_" version) == 3))

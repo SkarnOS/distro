@@ -51,26 +51,6 @@
         "v1.23.17": {
             "hash": "sha256-w1420ZpEfxPJrJrU1RGn/bvr3J3kPLhIEpOVgIJRBI0=",
             "digest": "sha256:46953dc9bc74e9a5dc86a994b3f7717805f9d0c690bafe78ab7af631b757decf"
-        },
-        "v1.22.17": {
-            "hash": "sha256-qzB6Iv+KPD7C0IErBYyoxAFmZDIyVO6j1dg/c+w4PCI=",
-            "digest": "sha256:460f00380eadc5bb6239e0cb0e6108ab84e4fd3bc19556682f69362f1cfaee32"
-        },
-        "v1.21.14": {
-            "hash": "sha256-cL2Xw2xXlGji1YgoI+6DonNm/7vkk2eofBxb8ITSse4=",
-            "digest": "sha256:56e3fd83edc68b971c896cae4718b95a4a5ac88594882b1955123d3a30eb2c8f"
-        },
-        "v1.20.15": {
-            "hash": "sha256-Luyyp9RklkQV8VFG5ZABhQBUKAnoRbyylJMKCQCKH48=",
-            "digest": "sha256:d0aeb14ec4b600bead8cf72e7c602d19180cf92bc1ff1dfe2815299dc38df006"
-        },
-        "v1.19.16": {
-            "hash": "sha256-ELqHbd92ORCEEZXpzCs7Cb7LY7j3W2wr9o3SsY8Qj5s=",
-            "digest": "sha256:2cad6a4cae1713e720e00e1a1c7ef7644777fe111e0b7cbed5f50adb8a3cdf30"
-        },
-        "v1.18.20": {
-            "hash": "sha256-d2nzC+5nRpptFgxzsCxMdwQHAxG225tXq+MY+Ceqvok=",
-            "digest": "sha256:391cf23f3094f59e1ce222cb1fd0593ee73e120d4fdeb29d563bd0432d2e7c32"
         }
     },
     "registry.k8s.io/kube-controller-manager": {
@@ -125,26 +105,6 @@
         "v1.23.17": {
             "hash": "sha256-dVyK1KIrtJMpmF7sOp6Ktp5g+LZFYhugmJDhvtG2s3k=",
             "digest": "sha256:fd32cfc25e88bdecd9259b4d207f5ff9389e5b926ac19319af46731cd8469153"
-        },
-        "v1.22.17": {
-            "hash": "sha256-mA0LTqjaT3f6PAkRUTpVRvDDscDni3+jDimylogeRuU=",
-            "digest": "sha256:48053335aba5ec857829396fe6ab299c10ea65c8e0248149e02d96cbd0b581aa"
-        },
-        "v1.21.14": {
-            "hash": "sha256-nU3r57CsOdjXwoC1tT8Eu+3pw4Szs+O7i2tICB/uxhM=",
-            "digest": "sha256:48528cf6f00ce37001f65fe658ab513caaf1cb245df8ab86d803590b3ce66e33"
-        },
-        "v1.20.15": {
-            "hash": "sha256-3UsmFk7sIgCzpDo9eWNQMLpRqAuk4y7WFz8BTkLDw20=",
-            "digest": "sha256:5125ea64b4987ed229e91bd7f9dbef1adc0c364edbc22fb1c788acc1b4d73b62"
-        },
-        "v1.19.16": {
-            "hash": "sha256-txyHunFDLfKZf2fTKaR3q0Gj/g5BNNWJ86GobbJ+LN4=",
-            "digest": "sha256:1d42f7d017f4ceeff46afb9cedd47b2b8140d1f2cc3bfebb57a40c3760acd482"
-        },
-        "v1.18.20": {
-            "hash": "sha256-exHjEdlfIVIdLShKSpGiyB/THZOGmnbd1Ll/bdvSSAM=",
-            "digest": "sha256:82f7ce237d1768af99e974fee222e800b3bd14294e1c634ca11699612a64ed23"
         }
     },
     "registry.k8s.io/kube-scheduler": {
@@ -199,26 +159,6 @@
         "v1.23.17": {
             "hash": "sha256-hBmTGtv01Hr+y+88Nk993GRyWQ96ux5Bec2Ziv2SYhk=",
             "digest": "sha256:22a823de026e68b2661b0706efcbed4b026efa7e37a0de400251f8576f352ea5"
-        },
-        "v1.22.17": {
-            "hash": "sha256-7cWdXOR0a2Ii5M2rDS0eAzmJmf9lsQcCZtWNCwrc2qQ=",
-            "digest": "sha256:bd7642f0d25996df2daa0b355cf4f1886c72a9573a2f0772c214f32a3441b277"
-        },
-        "v1.21.14": {
-            "hash": "sha256-1uDPO9zOOB0QU4RSrC1PkXQ0sfBi6iRgV7Q3ahROsyU=",
-            "digest": "sha256:67d226ce629ef439d8e1e1b401a6f828cc4558abd6d9e5e3717d188dc7ce4ba1"
-        },
-        "v1.20.15": {
-            "hash": "sha256-A8XxEqX6DOhZynf//VuRLF1F13vdzd5kX/lQd4hxonA=",
-            "digest": "sha256:5f7c88f2101781780737c9c396e218c92ccc1c7895dda2cb499d2c5096ab8708"
-        },
-        "v1.19.16": {
-            "hash": "sha256-FVQ+jdKm8naW1ZLl+qqwMcHKlfAw9ZKT32VYnOYu/U0=",
-            "digest": "sha256:1a335251eaef4e209d5757da0bf5499ecdce6e65413f7cb92ff4cc633d6fc7dd"
-        },
-        "v1.18.20": {
-            "hash": "sha256-lnGiyInFpqquZAOzAd7aCXBCNzc5G1yBWIM/MFdor1Q=",
-            "digest": "sha256:b1ae8022783f0bc6169330aa1927fff648ff81da74482f89da764cbb6be6a402"
         }
     },
     "registry.k8s.io/kube-proxy": {
@@ -273,26 +213,6 @@
         "v1.23.17": {
             "hash": "sha256-H8YiF9ZfqSn6+xWnsv7uqqsvF6ONErwCfCzCEuU+2rk=",
             "digest": "sha256:9305d3c1859b77c6e4d7b42ac477f7a4f955883459f2656b3543d551d3245c83"
-        },
-        "v1.22.17": {
-            "hash": "sha256-tocA+L3tjxMhsRVa0qyplUCwetDtAIvgYpE22O7IG18=",
-            "digest": "sha256:cfb5210283cd2c1aca30f8f89e64b9ca72a5d3f6bd82810897a1612c6f9c8536"
-        },
-        "v1.21.14": {
-            "hash": "sha256-zlIRT1v1Hmb0G9CrhbqbHZ8Mf0DtHgoRLY1uaYnyQHU=",
-            "digest": "sha256:650dc60fc75ecd78e0ac79e9296d405402e2032032bbd74ce8f61d241764486c"
-        },
-        "v1.20.15": {
-            "hash": "sha256-RuPM2PEWCTmj8FmPxxAadfZ5TDnJdKkWKjB0UBHqESQ=",
-            "digest": "sha256:4b6c25521c58d7b7968b85f1f7dd9db30719b3565af97250442f5df91aece29d"
-        },
-        "v1.19.16": {
-            "hash": "sha256-ow40BSmthojFn7BVvEYqPjB0xUGC98j/J9JaoxxS4Y8=",
-            "digest": "sha256:092f9526686d27964d17be772c42cde086690209cc8aea10c49991456eb879c2"
-        },
-        "v1.18.20": {
-            "hash": "sha256-dDdnrIMdwTwZV8VfkrRT42RF+t1aZAwvqAL2spIcnjc=",
-            "digest": "sha256:12f2b93c34db1caf73610092df74688e676c3b5abce940c25563ac5e93175381"
         }
     },
     "registry.k8s.io/pause": {
@@ -319,18 +239,6 @@
         "3.6": {
             "hash": "sha256-iGBcNemnLEZw2m1xt/yKoS1dZHYzVyiOs0AicETx8io=",
             "digest": "sha256:3d380ca8864549e74af4b29c10f9cb0956236dfb01c40ca076fb6c37253234db"
-        },
-        "3.5": {
-            "hash": "sha256-R3O9UqIvVPdQr5tPnNihK7UPHjsvKw00sdd9nQQhJGY=",
-            "digest": "sha256:1ff6c18fbef2045af6b9c16bf034cc421a29027b800e4f9b68ae9b1cb3e9ae07"
-        },
-        "3.4.1": {
-            "hash": "sha256-69Lcy3Fi4MfH/AqPUb5hn31576yxjU30BqS81z3NdYg=",
-            "digest": "sha256:6c3835cab3980f11b83277305d0d736051c32b17606f5ec59f1dda67c9ba3810"
-        },
-        "3.2": {
-            "hash": "sha256-9T0BcGtsBT9kS7zzgjZ4wbpE5y5o2IGVJRGWFPn2Uq4=",
-            "digest": "sha256:927d98197ec1141a368550822d18fa1c60bdae27b78b0c004f705f548c07814f"
         }
     },
     "quay.io/cilium/cilium": {
@@ -399,22 +307,6 @@
         "v1.8.6": {
             "hash": "sha256-Q3sNy5LLU3R+LOnWS32JZW+vdX4QBsTj9nbJGG5WMJ0=",
             "digest": "sha256:5b6ec0d6de9baaf3e92d0f66cd96a25b9edbce8716f5f15dcd1a616b3abd590e"
-        },
-        "v1.8.4": {
-            "hash": "sha256-O4S0t0CSrR2vcj6l+dnNXFr1j315If/DL0pA15eic/8=",
-            "digest": "sha256:6e5a02c21641597998b4be7cb5eb1e7b02c0d8d23cce4dd09f4682d463798890"
-        },
-        "v1.8.0": {
-            "hash": "sha256-avZlcO2fAPoEoib6H0NhKR8bbTvC2RMbQq9ha3SkrgM=",
-            "digest": "sha256:cc8fb77bc2a0541949d1d9320a641b82fd392b0d3d8145469ca4709ae769980e"
-        },
-        "v1.7.0": {
-            "hash": "sha256-8bXH/r+34c3AYZw1R/itNsCqBQF+yXin5UzAaVet1iE=",
-            "digest": "sha256:73ca82b4ce829766d4f1f10947c3a338888f876fbed0540dc849c89ff256e90c"
-        },
-        "v1.6.7": {
-            "hash": "sha256-jpSG2S+MjgOe8oqXlDOGliWYF0T8pxiXnl8jAYmeqQM=",
-            "digest": "sha256:2c8d61c46f484d881db43b34d13ca47a269336e576c81cf007ca740fa9ec0800"
         }
     },
     "registry.k8s.io/etcd": {
@@ -453,14 +345,6 @@
         "3.5.6-0": {
             "hash": "sha256-wHBXT5fS5blsBBuraW5DTg0XfBAKptMxTAucFDdUY80=",
             "digest": "sha256:dd75ec974b0a2a6f6bb47001ba09207976e625db898d1b16735528c009cb171c"
-        },
-        "3.4.13-0": {
-            "hash": "sha256-Q07rDCkdnh6abExa+qeL1Pxq0hUz61/v7N96anP61Nk=",
-            "digest": "sha256:4ad90a11b55313b182afc186b9876c8e891531b8db4c9bf1541953021618d0e2"
-        },
-        "3.4.3-0": {
-            "hash": "sha256-Tnb3TsN9b93gtZh5JtI84tpu5NJaL4NzzpjqVvooZgk=",
-            "digest": "sha256:4afb99b4690b418ffc2ceb67e1a17376457e441c1f09ab55447f0aaf992fa646"
         }
     },
     "quay.io/cilium/network-perf": {

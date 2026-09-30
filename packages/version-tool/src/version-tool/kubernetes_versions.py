@@ -255,12 +255,7 @@ async def resolve_special_version(tmpdir: str, kubernetes_version: str, image: s
                 constants_path += b"/cmd/kubeadm/app/constants/constants.go"
             case SpecialVersion.PAUSE_VERSION:
                 pattern = '''(?<=PauseVersion = ")([^"]+)(?=")'''
-                kubernetes_version_semver = semver.Version.parse(kubernetes_version)
-                if kubernetes_version_semver < semver.Version.parse("1.21.0") \
-                   and kubernetes_version_semver > semver.Version.parse("1.18.0"):
-                    constants_path += b"/cmd/kubeadm/app/constants/constants_unix.go"
-                else:
-                    constants_path += b"/cmd/kubeadm/app/constants/constants.go"
+                constants_path += b"/cmd/kubeadm/app/constants/constants.go"
 
         with open(constants_path, "r") as constants_file:
             constants = constants_file.read()
@@ -300,7 +295,7 @@ async def sync_kubernetes_versions(concurrency_limit: int | None = None):
                 version = value
             else:
                 version = name
-            if semver.Version.parse(version) < semver.Version.parse("1.18.0"):
+            if semver.Version.parse(version) < semver.Version.parse("1.23.0"):
                 del sources[name]
 
         with open("packages/sources.json", "wb") as sources_file:

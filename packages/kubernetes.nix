@@ -11,7 +11,6 @@
   nix-update-script,
   jq,
   writers,
-  breakpointHook,
   fetchpatch,
 
   version,
@@ -62,7 +61,6 @@ lib.fix (
       which
       rsync
       installShellFiles
-      breakpointHook
     ];
 
     outputs = [
