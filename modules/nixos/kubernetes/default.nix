@@ -101,6 +101,7 @@ in
 
   imports = [
     (lib.modules.importApply ./cilium.nix { inherit inputs; })
+    ./containerd.nix
     ./flannel.nix
     ./openebs.nix
     (lib.modules.importApply ./nix-snapshotter.nix { inherit inputs; })
