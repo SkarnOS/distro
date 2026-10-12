@@ -26,7 +26,7 @@ Currently to use SkarnOS, you must bring your own NixOS installation, SkarnOS ha
 
 ### Example
 
-We have also put together an example flake to showcase how we would assemble such a flake, go to [`./example`](./example) and get inspired. All the code under [`./example`](./example) is licensed under the [Unlicense](https://unlicense.org/). Feel
+We have also put together an example flake to showcase how we would assemble such a flake, go to [`./example`](./example) and get inspired. Feel
 free to use the [`./example`](./example) as a template for your own repository.
 
 ## Repository Structure
@@ -45,3 +45,7 @@ The repository is structured as such:
 # Contributing
 
 Even though this project is an early prototype, contributions are already welcome. We want to develop this in public from the early days. Currently what we would appreciate most is help with cleaning up the NixOS modules, they contain a lot of commented out code, which needs to be either uncommented and tested or dropped.
+
+# License
+
+SkarnOS is licensed under the [MIT License](./LICENSE).
